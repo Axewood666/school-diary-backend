@@ -23,6 +23,7 @@ class Subject(Base):
     name = Column(String, nullable=False)
     
     lessons = relationship("Lesson", back_populates="subject")
+    teacher_subjects = relationship("TeacherSubject", back_populates="subject")
 
 
 class Lesson(Base):
@@ -40,6 +41,8 @@ class Lesson(Base):
     subject = relationship("Subject", back_populates="lessons")
     grades = relationship("Grade", back_populates="lesson")
     homework = relationship("Homework", back_populates="lesson")
+    teacher = relationship("Teacher", back_populates="lessons")
+    class_ = relationship("Class", back_populates="lessons")
 
 
 class Grade(Base):
@@ -73,3 +76,6 @@ class TeacherSubject(Base):
     id = Column(Integer, primary_key=True, index=True)
     teacher_id = Column(Integer, ForeignKey("teachers.id"), nullable=False)
     subject_id = Column(Integer, ForeignKey("subjects.id"), nullable=False)
+
+    teacher = relationship("Teacher", back_populates="teacher_subjects")
+    subject = relationship("Subject", back_populates="teacher_subjects")

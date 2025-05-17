@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.config import settings
 from app.core.security import create_access_token, get_password_hash, verify_password
 from app.db.repositories.user import user_repository
-from app.schemas.auth import Token, UserCreate
+from app.schemas.auth import Token, UserCreate, UserInDB
 
 
 async def get_user_by_id(db: AsyncSession, user_id: int):
@@ -39,10 +39,9 @@ async def create_user(db: AsyncSession, user_in: UserCreate):
         )
     
     hashed_password = get_password_hash(user_in.password)
-    user_data = user_in.dict(exclude={"password"})
+    user_data = user_in.model_dump(exclude={"password"})
     user_data["hashed_password"] = hashed_password
-    
-    db_user = await user_repository.create(db=db, obj_in=UserCreate(**user_data))
+    db_user = await user_repository.create(db=db, obj_in=UserInDB(**user_data))
     return db_user
 
 

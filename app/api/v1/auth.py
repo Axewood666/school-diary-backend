@@ -22,7 +22,7 @@ async def login(
 ):
     """OAuth2 compatible token login, get an access token for future requests"""
     user = await authenticate_user(db=db, username=form_data.username, password=form_data.password)
-    if not user:
+    if not user or not user.is_active:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password",

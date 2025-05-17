@@ -7,7 +7,6 @@ class UserRole(PythonEnum):
     ADMIN = "admin"
     TEACHER = "teacher"
     STUDENT = "student"
-    PARENT = "parent"
 
 class User(Base):
     __tablename__ = "users"
@@ -22,7 +21,6 @@ class User(Base):
     
     students = relationship("Student", back_populates="user")
     teachers = relationship("Teacher", back_populates="user")
-    parents = relationship("Parent", back_populates="user")
 
 class Student(Base):
     __tablename__ = "students"
@@ -44,3 +42,4 @@ class Teacher(Base):
     user = relationship("User", back_populates="teachers")
     class_ = relationship("Class", back_populates="teachers")
     teacher_subjects = relationship("TeacherSubject", back_populates="teacher")
+    lessons = relationship("Lesson", back_populates="teacher")

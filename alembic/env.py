@@ -7,7 +7,6 @@ from sqlalchemy import pool
 
 from alembic import context
 
-
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 
@@ -18,6 +17,12 @@ if config.config_file_name is not None:
 
 
 from app.db.base import Base  # noqa
+from app.db.models.user import User
+from app.db.models.diary import Subject, Lesson, Grade, Homework, TeacherSubject
+from app.db.models.class_ import Class
+from app.db.models.user import User, Teacher, Student
+
+
 target_metadata = Base.metadata
 
 def run_migrations_offline():

@@ -1,0 +1,20 @@
+{
+    email igor.zhugar@mail.ru
+}
+
+axewood666.ru {
+    header {
+        Strict-Transport-Security max-age=31536000
+        X-Content-Type-Options nosniff
+        X-Frame-Options DENY
+        Referrer-Policy no-referrer-when-downgrade
+        +Server "School Diary Server"
+    }
+    
+    reverse_proxy diary:80
+    
+    log {
+        output stdout
+        format json
+    }
+} 

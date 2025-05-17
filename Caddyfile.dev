@@ -1,0 +1,14 @@
+{
+    email igor.zhugar@mail.ru
+}
+
+localhost {
+    tls internal
+    
+    reverse_proxy diary:80
+    
+    log {
+        output stdout
+        format console
+    }
+} 

@@ -23,7 +23,7 @@ class SubjectInDBBase(SubjectBase):
     id: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class Subject(SubjectInDBBase):
@@ -57,7 +57,7 @@ class LessonInDBBase(LessonBase):
     subject: Subject
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class Lesson(LessonInDBBase):
@@ -89,7 +89,7 @@ class GradeInDBBase(GradeBase):
     lesson: Lesson
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class Grade(GradeInDBBase):
@@ -119,7 +119,7 @@ class HomeworkInDBBase(HomeworkBase):
     id: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class Homework(HomeworkInDBBase):

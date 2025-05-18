@@ -1,5 +1,6 @@
 {
     email igor.zhugar@mail.ru
+    acme_ca https://acme-v02.api.letsencrypt.org/directory
 }
 
 axewood666.ru {
@@ -8,7 +9,7 @@ axewood666.ru {
         X-Content-Type-Options nosniff
         X-Frame-Options DENY
         Referrer-Policy no-referrer-when-downgrade
-        +Server "School Diary Server"
+        -Server
     }
     
     reverse_proxy diary:80
@@ -17,4 +18,19 @@ axewood666.ru {
         output stdout
         format json
     }
-} 
+}
+
+files.axewood666.ru {
+    header {
+        Strict-Transport-Security max-age=31536000
+        X-Content-Type-Options nosniff
+    }
+    
+    reverse_proxy minio:9000 {
+        header_up Host {upstream_hostport}
+    }
+}
+
+console.minio.axewood666.ru {
+    reverse_proxy minio:9001
+}

@@ -17,7 +17,9 @@ async def get_user_by_id(db: AsyncSession, user_id: int):
 async def authenticate_user(db: AsyncSession, username: str, password: str):
     user = await user_repository.get_by_username(db=db, username=username)
     if not user:
-        return None
+        user = await user_repository.get_by_email(db=db, email=username)
+        if not user:
+            return None
     if not verify_password(password, user.hashed_password):
         return None
     return user

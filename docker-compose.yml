@@ -4,6 +4,8 @@ volumes:
   postgres_data:
   caddy_data:
   caddy_config:
+  minio_data:
+
 
 services:
   postgres:
@@ -18,7 +20,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d diary_db"]
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d diary_db" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -38,10 +40,18 @@ services:
       PROJECT_NAME: School Diary API
       API_V1_STR: /api/v1
       PORT: 80
+      MINIO_ENDPOINT: minio:9000
+      MINIO_ACCESS_KEY: MY_ACCESS_MINIO
+      MINIO_SECRET_KEY: MY_SECRET_MINIO
+      MINIO_PUBLIC_BUCKET: public
+      MINIO_USE_HTTPS: "false"
+      MINIO_EXTERNAL_ENDPOINT: minio.axewood666.ru
     ports:
       - "8000:80"
     depends_on:
       postgres:
+        condition: service_healthy
+      minio:
         condition: service_healthy
     restart: unless-stopped
     networks:
@@ -59,6 +69,27 @@ services:
       - caddy_config:/config
     depends_on:
       - diary
+    restart: unless-stopped
+    networks:
+      - backend-network
+
+  minio:
+    container_name: minio
+    image: minio/minio:latest
+    volumes:
+      - minio_data:/data
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: MY_ACCESS_MINIO
+      MINIO_ROOT_PASSWORD: MY_SECRET_MINIO
+    command: server --console-address ":9001" /data
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
+      interval: 30s
+      timeout: 20s
+      retries: 3
     restart: unless-stopped
     networks:
       - backend-network

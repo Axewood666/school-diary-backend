@@ -9,13 +9,6 @@ from app.services.auth import authenticate_user, create_user, create_user_token
 
 router = APIRouter(tags=["auth"])
 
-
-@router.post("/register", response_model=User)
-async def register(user_in: UserCreate, db: AsyncSession = Depends(get_db)):
-    """Register a new user"""
-    return await create_user(db=db, user_in=user_in)
-
-
 @router.post("/login", response_model=Token)
 async def login(
     form_data: OAuth2PasswordRequestForm = Depends(), db: AsyncSession = Depends(get_db)

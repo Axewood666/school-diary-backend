@@ -33,6 +33,9 @@ ACCESS_TOKEN_EXPIRE_MINUTES=600        # Время жизни токена в �
 MINIO_ACCESS_KEY=MY_ACCESS_MINIO       # Ключ доступа MinIO
 MINIO_SECRET_KEY=MY_SECRET_MINIO       # Секретный ключ MinIO
 MINIO_PUBLIC_BUCKET=public             # Имя публичного бакета
+MINIO_REDIRECT_USE_HTTPS=false/true        # Использовать HTTPS для перенаправления на MinIO
+MINIO_EXTERNAL_ENDPOINT=files.yourdomain.ru # Внешний адрес MinIO
+MINIO_USE_HTTPS=false/true                     # Использовать HTTPS для MinIO
 ```
 
 Для продакшн окружения рекомендуется изменить значения параметров на более безопасные.

@@ -22,6 +22,7 @@ class Settings(BaseSettings):
     MINIO_SECRET_KEY: str = os.getenv("MINIO_SECRET_KEY", "minioadmin")
     MINIO_PUBLIC_BUCKET: str = os.getenv("MINIO_PUBLIC_BUCKET", "public")
     MINIO_USE_HTTPS: bool = os.getenv("MINIO_USE_HTTPS", "false").lower() == "true"
+    MINIO_REDIRECT_USE_HTTPS: bool = os.getenv("MINIO_REDIRECT_USE_HTTPS", "false").lower() == "true"
     MINIO_EXTERNAL_ENDPOINT: str = os.getenv("MINIO_EXTERNAL_ENDPOINT", "")
 
     @model_validator(mode='after')

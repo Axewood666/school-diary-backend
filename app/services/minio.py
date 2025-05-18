@@ -26,7 +26,7 @@ class MinioService:
             secure=secure,
         )
         self.external_endpoint = external_endpoint
-        self.secure = secure
+        self.secure = settings.MINIO_REDIRECT_USE_HTTPS
         
     async def ensure_bucket_exists(self, bucket_name: str, make_public: bool = False) -> None:
         """Проверяет существование бакета и создает его при необходимости"""

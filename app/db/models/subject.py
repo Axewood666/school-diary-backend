@@ -21,6 +21,9 @@ class Subject(Base):
     created_at = Column(DateTime, default=datetime.now)
     
     teacher_subjects = relationship("TeacherSubject", back_populates="subject")
+    homework = relationship("Homework", back_populates="subject")
+    grades = relationship("Grade", back_populates="subject")
+    schedule = relationship("Schedule", back_populates="subject")
 
 
 class TeacherSubject(Base):

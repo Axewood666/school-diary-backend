@@ -2,7 +2,8 @@ from enum import Enum as PythonEnum
 from sqlalchemy import Boolean, Column, Integer, String, Enum as SQLEnum, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
 from app.db.base import Base
-from datetime import datetime
+from datetime import datetime, timedelta
+
 class UserRole(PythonEnum):
     ADMIN = "admin"
     TEACHER = "teacher"
@@ -35,6 +36,8 @@ class Student(Base):
 
     user = relationship("User", back_populates="student")
     class_ = relationship("Class", back_populates="students")
+    homework = relationship("Homework", back_populates="student")
+    grades = relationship("Grade", back_populates="student")
 
 class Teacher(Base):
     __tablename__ = "teachers"
@@ -48,4 +51,24 @@ class Teacher(Base):
     user = relationship("User", back_populates="teacher")
     class_ = relationship("Class", back_populates="teacher")
     teacher_subjects = relationship("TeacherSubject", back_populates="teacher")
-    # lessons = relationship("Lesson", back_populates="teacher")
+    homework = relationship("Homework", back_populates="teacher")
+    grades = relationship("Grade", back_populates="teacher")
+    schedule = relationship("Schedule", back_populates="teacher")
+    
+class UserInvite(Base):
+    __tablename__ = "user_invites"
+
+    id = Column(Integer, primary_key=True, index=True)
+    email = Column(String, nullable=False)
+    full_name = Column(String, nullable=False)
+    token = Column(String, nullable=False)
+    expires_at = Column(DateTime, nullable=False, default=datetime.now() + timedelta(days=7))
+    role = Column(SQLEnum(UserRole), nullable=False)
+    used_at = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, default=datetime.now)
+
+    def is_expired(self):
+        return self.expires_at < datetime.now()
+    
+    def is_used(self):
+        return self.used_at is not None

@@ -29,6 +29,7 @@ class AcademicPeriod(Base):
 
     year = relationship("AcademicYear", back_populates="periods")
     weeks = relationship("AcademicWeek", back_populates="period")
+    lesson_times = relationship("LessonTime", back_populates="period")
 
 class AcademicWeek(Base):
     __tablename__ = "academic_weeks"
@@ -43,3 +44,4 @@ class AcademicWeek(Base):
     is_holiday = Column(Boolean, default=False)
 
     period = relationship("AcademicPeriod", back_populates="weeks")
+    schedule = relationship("Schedule", back_populates="week")

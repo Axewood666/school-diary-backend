@@ -1,5 +1,5 @@
 from app.db.base import Base
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Boolean
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Boolean, Text
 from sqlalchemy.orm import relationship
 from datetime import datetime
 
@@ -37,3 +37,43 @@ class Schedule(Base):
     subject = relationship("Subject", back_populates="schedule")
     original_teacher = relationship("Teacher", back_populates="original_schedule")
     replacement_teacher = relationship("Teacher", back_populates="replacement_schedule")
+    
+class Homework(Base):
+    __tablename__ = "homework"
+
+    id = Column(Integer, primary_key=True, index=True)
+    schedule_id = Column(Integer, ForeignKey("schedule.id"), nullable=False)
+    teacher_id = Column(Integer, ForeignKey("teachers.user_id"), nullable=False)
+    student_id = Column(Integer, ForeignKey("students.user_id"), nullable=False)
+    subject_id = Column(Integer, ForeignKey("subjects.id"), nullable=False)
+    description = Column(String, nullable=False)
+    assignment_at = Column(DateTime, nullable=False)
+    due_date = Column(DateTime, nullable=True)
+    is_done = Column(Boolean, default=False)    
+    created_at = Column(DateTime, default=datetime.now)
+    file_id = Column(Integer, ForeignKey("files.id"), nullable=True)
+    
+    schedule = relationship("Schedule", back_populates="homework")
+    student = relationship("Student", back_populates="homework")
+    subject = relationship("Subject", back_populates="homework")
+    teacher = relationship("Teacher", back_populates="homework")
+    file = relationship("File", back_populates="homework")
+    
+class Grade(Base):
+    __tablename__ = "grades"
+
+    id = Column(Integer, primary_key=True, index=True)
+    schedule_id = Column(Integer, ForeignKey("schedule.id"), nullable=False)
+    student_id = Column(Integer, ForeignKey("students.user_id"), nullable=False)
+    subject_id = Column(Integer, ForeignKey("subjects.id"), nullable=False)
+    teacher_id = Column(Integer, ForeignKey("teachers.user_id"), nullable=False)
+    homework_id = Column(Integer, ForeignKey("homework.id"), nullable=True)
+    comment = Column(Text, nullable=True)
+    score = Column(Integer, nullable=False)
+    created_at = Column(DateTime, default=datetime.now)
+    
+    schedule = relationship("Schedule", back_populates="grades")
+    student = relationship("Student", back_populates="grades")
+    subject = relationship("Subject", back_populates="grades")
+    teacher = relationship("Teacher", back_populates="grades")
+    homework = relationship("Homework", back_populates="grades")

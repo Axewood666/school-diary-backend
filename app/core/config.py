@@ -6,7 +6,7 @@ class Settings(BaseSettings):
     PROJECT_NAME: str = os.getenv("PROJECT_NAME")
     API_V1_STR: str = os.getenv("API_V1_STR")
     PORT: int = os.getenv("PORT")
-    # FRONTEND_URL: str = os.getenv("FRONTEND_URL")
+    FRONTEND_URL: str = os.getenv("FRONTEND_URL")
     # Подключение к БД
     DATABASE_URL: str = os.getenv("DATABASE_URL")
     DATABASE_URL_MIGRATE: str = os.getenv("DATABASE_URL_MIGRATE")
@@ -31,6 +31,17 @@ class Settings(BaseSettings):
             self.MINIO_EXTERNAL_ENDPOINT = self.MINIO_ENDPOINT
         return self
 
+    # Mailer настройки
+    MAIL_USERNAME: str = os.getenv("MAIL_USERNAME")
+    MAIL_PASSWORD: str = os.getenv("MAIL_PASSWORD")
+    MAIL_FROM: str = os.getenv("MAIL_FROM")
+    MAIL_PORT: int = os.getenv("MAIL_PORT")
+    MAIL_SERVER: str = os.getenv("MAIL_SERVER")
+    MAIL_STARTTLS: bool = os.getenv("MAIL_STARTTLS")
+    MAIL_SSL_TLS: bool = os.getenv("MAIL_SSL_TLS")
+    USE_CREDENTIALS: bool = os.getenv("USE_CREDENTIALS")
+    VALIDATE_CERTS: bool = os.getenv("VALIDATE_CERTS")
+    
     model_config = {
         "env_file": ".env",
         "case_sensitive": True,

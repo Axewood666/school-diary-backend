@@ -53,7 +53,18 @@ class Teacher(Base):
     teacher_subjects = relationship("TeacherSubject", back_populates="teacher")
     homework = relationship("Homework", back_populates="teacher")
     grades = relationship("Grade", back_populates="teacher")
-    schedule = relationship("Schedule", back_populates="teacher")
+    
+    schedule = relationship(
+        "Schedule", 
+        foreign_keys="Schedule.teacher_id", 
+        back_populates="teacher"
+    )
+    
+    replaced_schedule = relationship(
+        "Schedule", 
+        foreign_keys="Schedule.original_teacher_id", 
+        back_populates="original_teacher"
+    )
     
 class UserInvite(Base):
     __tablename__ = "user_invites"
@@ -66,7 +77,7 @@ class UserInvite(Base):
     role = Column(SQLEnum(UserRole), nullable=False)
     used_at = Column(DateTime, nullable=True)
     created_at = Column(DateTime, default=datetime.now)
-
+    is_sent = Column(Boolean, default=False)
     def is_expired(self):
         return self.expires_at < datetime.now()
     

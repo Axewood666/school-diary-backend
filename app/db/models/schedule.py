@@ -14,7 +14,7 @@ class LessonTimes(Base):
     created_at = Column(DateTime, default=datetime.now)
 
     period = relationship("AcademicPeriod", back_populates="lesson_times")
-
+    schedule = relationship("Schedule", back_populates="lesson_time")
 class Schedule(Base):
     __tablename__ = "schedule"
 
@@ -35,9 +35,20 @@ class Schedule(Base):
     class_ = relationship("Class", back_populates="schedule")
     teacher = relationship("Teacher", back_populates="schedule")
     subject = relationship("Subject", back_populates="schedule")
-    original_teacher = relationship("Teacher", back_populates="original_schedule")
-    replacement_teacher = relationship("Teacher", back_populates="replacement_schedule")
+    homework = relationship("Homework", back_populates="schedule")
+    grades = relationship("Grade", back_populates="schedule")
     
+    teacher = relationship(
+        "Teacher", 
+        foreign_keys=[teacher_id],
+        back_populates="schedule"
+    )
+    
+    original_teacher = relationship(
+        "Teacher", 
+        foreign_keys=[original_teacher_id],
+        back_populates="replaced_schedule"
+    )    
 class Homework(Base):
     __tablename__ = "homework"
 
@@ -58,7 +69,7 @@ class Homework(Base):
     subject = relationship("Subject", back_populates="homework")
     teacher = relationship("Teacher", back_populates="homework")
     file = relationship("File", back_populates="homework")
-    
+    grades = relationship("Grade", back_populates="homework")
 class Grade(Base):
     __tablename__ = "grades"
 

@@ -4,11 +4,15 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api import api_router
 from app.core.config import settings
+from app.core.logger import setup_logging
+import logging
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
     openapi_url=f"{settings.API_V1_STR}/openapi.json"
 )
+setup_logging()
+logger = logging.getLogger("app")
 
 app.add_middleware(
     CORSMiddleware,

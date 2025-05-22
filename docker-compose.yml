@@ -30,6 +30,7 @@ services:
     container_name: diary
     build: .
     environment:
+      FRONTEND_URL: ${FRONTEND_URL}
       DATABASE_URL: ${DATABASE_URL}
       DATABASE_URL_MIGRATE: ${DATABASE_URL_MIGRATE}
       SECRET_KEY: ${SECRET_KEY}

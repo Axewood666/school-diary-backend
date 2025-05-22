@@ -7,14 +7,15 @@ from app.db.session import get_db
 
 from app.db.repositories.file import file_repository
 from app.schemas.file import File, FileCreate
+from app.schemas.response import success_response, error_response
 from app.services.minio import MinioService, get_minio_service
 from app.core.dependencies import get_current_user
-from app.schemas.auth import User
+from app.schemas.role import User, UserRole
 
 
 router = APIRouter(tags=["files"])
 
-@router.post("/", response_model=File)
+@router.post("/")
 async def upload_file(
     file: UploadFile = FastAPIFile(...),
     db: AsyncSession = Depends(get_db),
@@ -23,17 +24,20 @@ async def upload_file(
 ):
     """Загрузка файла в хранилище."""
     try:
-        # Загружаем файл в MinIO
+        file_data = await file.read()
+        file_size = len(file_data)
+        if file_size > 50 * 1024 * 1024: 
+            return error_response(
+                message="File size exceeds maximum limit of 50MB",
+                error_code="FILE_TOO_LARGE"
+            )
+        
+        await file.seek(0)
+        
         object_name = await minio_service.upload_file(
             file=file
         )
         
-        # Получаем размер файла
-        file_data = await file.read()
-        file_size = len(file_data)
-        await file.seek(0)
-        
-        # Создаем запись в БД о файле
         file_create = FileCreate(
             filename=object_name.split("/")[-1],
             original_filename=file.filename or "file",
@@ -53,11 +57,17 @@ async def upload_file(
         result = File.model_validate(db_file)
         result.url = file_url
         
-        return result
+        return success_response(
+            data=result,
+            message="File uploaded successfully"
+        )
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Ошибка при загрузке файла: {str(e)}")
+        return error_response(
+            message=f"Failed to upload file: {str(e)}",
+            error_code="FILE_UPLOAD_ERROR"
+        )
 
-@router.get("/{file_id}", response_model=File)
+@router.get("/{file_id}")
 async def get_file_by_id(
     file_id: int,
     db: AsyncSession = Depends(get_db),
@@ -65,16 +75,66 @@ async def get_file_by_id(
     _: User = Depends(get_current_user),
 ):
     """Получение информации о файле с URL для доступа."""
-    db_file = await file_repository.get(db=db, id=file_id)
-    if not db_file:
-        raise HTTPException(status_code=404, detail="Файл не найден")
-    
-    file_url = await minio_service.get_direct_file_url(
-        bucket_name=settings.MINIO_PUBLIC_BUCKET,
-        object_name=db_file.object_name
-    )
-    
-    result = File.model_validate(db_file)
-    result.url = file_url
-    
-    return result
+    try:
+        db_file = await file_repository.get(db=db, id=file_id)
+        if not db_file:
+            return error_response(
+                message="File not found",
+                error_code="FILE_NOT_FOUND"
+            )
+        
+        file_url = await minio_service.get_direct_file_url(
+            bucket_name=settings.MINIO_PUBLIC_BUCKET,
+            object_name=db_file.object_name
+        )
+        
+        result = File.model_validate(db_file)
+        result.url = file_url
+        
+        return success_response(
+            data=result,
+            message="File retrieved successfully"
+        )
+    except Exception as e:
+        return error_response(
+            message=f"Failed to retrieve file: {str(e)}",
+            error_code="GET_FILE_ERROR"
+        )
+
+@router.delete("/{file_id}")
+async def delete_file(
+    file_id: int,
+    db: AsyncSession = Depends(get_db),
+    minio_service: MinioService = Depends(get_minio_service),
+    current_user: User = Depends(get_current_user)
+):
+    """Удаление файла."""
+    if current_user.role != UserRole.ADMIN:
+        return error_response(
+            message="You are not allowed to delete files",
+            error_code="INSUFFICIENT_PERMISSIONS"
+        )
+    try:
+        db_file = await file_repository.get(db=db, id=file_id)
+        if not db_file:
+            return error_response(
+                message="File not found",
+                error_code="FILE_NOT_FOUND"
+            )
+        
+        await minio_service.delete_file(
+            bucket_name=db_file.bucket_name,
+            object_name=db_file.object_name
+        )
+        
+        await file_repository.remove(db=db, id=file_id)
+        
+        return success_response(
+            data={"deleted": True},
+            message="File deleted successfully"
+        )
+    except Exception as e:
+        return error_response(
+            message=f"Failed to delete file: {str(e)}",
+            error_code="DELETE_FILE_ERROR"
+        )

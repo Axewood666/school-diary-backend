@@ -2,6 +2,7 @@ import uuid
 from io import BytesIO
 from typing import Optional, List, Dict, Any
 import json
+import uuid
 
 from fastapi import UploadFile, HTTPException
 from minio import Minio
@@ -67,21 +68,17 @@ class MinioService:
         try:
             await self.ensure_bucket_exists(bucket_name, make_public=make_public)
             
-            # Генерация уникального имени файла
             original_filename = file.filename or "file"
             file_name = f"{original_filename}-{uuid.uuid4()}"
             
-            # Добавляем префикс папки, если указан
             if folder:
                 object_name = f"{folder}/{file_name}"
             else:
                 object_name = file_name
             
-            # Подготовка файла для загрузки
             file_data = await file.read()
             file_size = len(file_data)
             
-            # Загрузка файла
             self.client.put_object(
                 bucket_name=bucket_name,
                 object_name=object_name,
@@ -105,20 +102,15 @@ class MinioService:
     ) -> tuple[BytesIO, str, int]:
         """Скачивает файл из MinIO и возвращает его содержимое, имя и размер"""
         try:
-            # Получаем метаданные объекта
             stat = self.client.stat_object(bucket_name, object_name)
             
-            # Скачиваем объект
             response = self.client.get_object(bucket_name, object_name)
             
-            # Читаем содержимое в память
             data = BytesIO(response.read())
             
-            # Не забываем закрыть соединение
             response.close()
             response.release_conn()
             
-            # Возвращаем содержимое, имя и размер файла
             filename = object_name.split("/")[-1]
             return data, filename, stat.size
         except S3Error as err:
@@ -145,7 +137,6 @@ class MinioService:
     ) -> str:
         """Генерирует прямую URL-ссылку для доступа к файлу"""
         try:
-            # Прямая ссылка строится по шаблону: http(s)://<endpoint>/<bucket>/<object>
             protocol = "https" if self.secure else "http"
             return f"{protocol}://{self.external_endpoint}/{bucket_name}/{object_name}"
         except Exception as err:

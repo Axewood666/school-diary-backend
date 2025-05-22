@@ -7,11 +7,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.config import settings
 from app.core.security import create_access_token, get_password_hash, verify_password
 from app.db.repositories.user import user_repository
-from app.schemas.auth import Token, UserCreate, UserInDB, UserInviteCreate, AcceptInvite
+from app.schemas.auth import Token, UserInviteCreate, AcceptInvite
 from app.services.mailer import MailerService
 from datetime import datetime
 from app.services.helpers import username_from_fio
-from app.schemas.role import StudentInDb, TeacherInDb
+from app.schemas.role import StudentInDb, TeacherInDb, UserInDB, UserCreate
 from app.db.models.user import UserRole
 from app.db.repositories.user_invites import user_invite_repository
 async def get_user_by_id(db: AsyncSession, user_id: int):
@@ -26,6 +26,11 @@ async def authenticate_user(db: AsyncSession, username: str, password: str):
             return None
     if not verify_password(password, user.hashed_password):
         return None
+    if not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Inactive user",
+        )
     return user
 
 
@@ -127,7 +132,8 @@ async def invite_accept_process(accept_invite: AcceptInvite, db: AsyncSession):
         "role": invite.role
     }
     db_user = await user_repository.create(db=db, obj_in=UserInDB(**user_data))
-    
+    invite.used_at = datetime.now()
+    # await user_invite_repository.update(db=db, db_obj=invite, obj_in=invite)
     if invite.role == UserRole.STUDENT:
         student_data = {
             "user_id": db_user.id,
@@ -135,16 +141,16 @@ async def invite_accept_process(accept_invite: AcceptInvite, db: AsyncSession):
             "parent_phone": None,
             "parent_email": None,
         }
-        await user_repository.create_student(db=db, obj_in=StudentInDb(**student_data))
+        await user_repository.create_student(db=db, student_in=StudentInDb(**student_data))
     elif invite.role == UserRole.TEACHER:
         teacher_data = {
             "user_id": db_user.id,
             "class_id": None,
             "degree": None,
             "experience": None,
-            "bio": None,
+            "bio": None
         }
-        await user_repository.create_teacher(db=db, obj_in=TeacherInDb(**teacher_data))
+        await user_repository.create_teacher(db=db, teacher_in=TeacherInDb(**teacher_data))
     
     token = create_user_token(user_id=db_user.id)
     return token

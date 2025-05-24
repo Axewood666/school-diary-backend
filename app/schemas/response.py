@@ -1,8 +1,7 @@
 from pydantic import BaseModel
 from typing import Generic, TypeVar, Optional, Any, List
 from app.schemas.auth import Token, UserInviteInfo
-from app.schemas.role import User
-from datetime import datetime
+from app.schemas.role import User, Student, UserResponse, Teacher
 
 T = TypeVar('T')
 
@@ -19,21 +18,8 @@ class ErrorResponse(BaseModel):
     message: str
     error_code: Optional[str] = None
 
-
-class LoginSuccessResponse(BaseModel):
+class LoginSuccessResponse(Token):
     result: bool = True
-    response: Token
-    message: str
-
-class InviteSuccessResponse(BaseModel):
-    result: bool = True
-    response: dict  
-    message: str
-
-class InviteAcceptSuccessResponse(BaseModel):
-    result: bool = True
-    response: Token 
-    message: str
 
 class PaginationInfo(BaseModel):
     skip: int
@@ -44,75 +30,33 @@ class InviteListData(BaseModel):
     invites: List[UserInviteInfo]
     pagination: PaginationInfo
 
-class InviteListSuccessResponse(BaseModel):
-    result: bool = True
-    response: InviteListData
-    message: str
-
-class InviteValidationData(BaseModel):
-    is_valid: bool
-    invite_info: dict
-
-class InviteValidationSuccessResponse(BaseModel):
-    result: bool = True
-    response: InviteValidationData
-    message: str
-
-class UserInfoSuccessResponse(BaseModel):
-    result: bool = True
-    response: User
-    message: str
-
 class UsersListData(BaseModel):
     users: List[User]
     pagination: PaginationInfo
 
-class UsersListSuccessResponse(BaseModel):
-    result: bool = True
-    response: UsersListData
-    message: str
+class UserWithStudentInfo(BaseModel):
+    user_info: UserResponse
+    student_info: Student
+    
 
 class StudentsListData(BaseModel):
-    students: List[dict]  
+    students: List[UserWithStudentInfo]  
     pagination: PaginationInfo
 
-class StudentsListSuccessResponse(BaseModel):
-    result: bool = True
-    response: StudentsListData
-    message: str
-
-class StudentInfoSuccessResponse(BaseModel):
-    result: bool = True
-    response: dict 
-    message: str
+class UserWithTeacherInfo(BaseModel):
+    user_info: UserResponse
+    teacher_info: Teacher
 
 class TeachersListData(BaseModel):
-    teachers: List[dict] 
+    teachers: List[UserWithTeacherInfo] 
     pagination: PaginationInfo
-
-class TeachersListSuccessResponse(BaseModel):
-    result: bool = True
-    response: TeachersListData
-    message: str
-
-class TeacherInfoSuccessResponse(BaseModel):
-    result: bool = True
-    response: dict  
-    message: str
 
 class AdminsListData(BaseModel):
     admins: List[User]
     pagination: PaginationInfo
 
-class AdminsListSuccessResponse(BaseModel):
-    result: bool = True
-    response: AdminsListData
-    message: str
-
-class UserUpdateSuccessResponse(BaseModel):
-    result: bool = True
-    response: dict  
-    message: str
+class UserDeactivateData(BaseModel):
+    is_deactivated: bool
 
 def success_response(data: Any, message: str = "Success") -> dict:
     return {

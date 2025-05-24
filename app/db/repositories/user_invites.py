@@ -5,6 +5,7 @@ from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Optional
 import uuid
+from datetime import datetime
 
 class UserInviteRepository(BaseRepository[UserInvite, UserInviteCreate, UserInviteUpdate]):
     async def get_by_email(self, db: AsyncSession, *, email: str) -> Optional[UserInvite]:
@@ -33,6 +34,10 @@ class UserInviteRepository(BaseRepository[UserInvite, UserInviteCreate, UserInvi
     
     async def update_sent_status(self, db: AsyncSession, *, user_invite_id: int):
         query = update(UserInvite).where(UserInvite.id == user_invite_id).values(is_sent=True)
+        await db.execute(query)
+        await db.commit()
+    async def update_used_status(self, db: AsyncSession, *, user_invite_id: int):
+        query = update(UserInvite).where(UserInvite.id == user_invite_id).values(used_at=datetime.now())
         await db.execute(query)
         await db.commit()
 

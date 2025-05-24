@@ -47,3 +47,7 @@ class UserInviteUpdate(BaseModel):
     used_at: Optional[datetime]
     class Config:
         from_attributes = True
+        
+class InviteValidationData(BaseModel):
+    is_valid: bool
+    invite_info: UserInviteInfo

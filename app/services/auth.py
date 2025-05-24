@@ -95,7 +95,7 @@ async def create_user_invite(db: AsyncSession,
             detail="Failed to send email",
         )
         
-async def invite_accept_process(accept_invite: AcceptInvite, db: AsyncSession):
+async def invite_accept_process(accept_invite: AcceptInvite, db: AsyncSession) -> int:
     invite = await user_invite_repository.get_by_token(db=db, token=accept_invite.token)
     if not invite:
         raise HTTPException(
@@ -133,7 +133,7 @@ async def invite_accept_process(accept_invite: AcceptInvite, db: AsyncSession):
     }
     db_user = await user_repository.create(db=db, obj_in=UserInDB(**user_data))
     invite.used_at = datetime.now()
-    # await user_invite_repository.update(db=db, db_obj=invite, obj_in=invite)
+    await user_invite_repository.update_used_status(db=db, user_invite_id=invite.id)
     if invite.role == UserRole.STUDENT:
         student_data = {
             "user_id": db_user.id,
@@ -152,5 +152,4 @@ async def invite_accept_process(accept_invite: AcceptInvite, db: AsyncSession):
         }
         await user_repository.create_teacher(db=db, teacher_in=TeacherInDb(**teacher_data))
     
-    token = create_user_token(user_id=db_user.id)
-    return token
+    return db_user.id

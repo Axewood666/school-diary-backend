@@ -1,8 +1,8 @@
-"""add_default_admin_user
+"""add default admin user
 
-Revision ID: 7af9b59e77b6
-Revises: d6d803865fb3
-Create Date: 2025-05-19 00:05:47.311176
+Revision ID: db752ee68faa
+Revises: 7f5278b1e51a
+Create Date: 2025-05-21 22:45:40.361195
 
 """
 from typing import Sequence, Union
@@ -11,22 +11,27 @@ from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-from app.core.security import get_password_hash
-from app.db.models.user import UserRole
 
-# revision identifiers, used by Alembic.
-revision: str = '7af9b59e77b6'
-down_revision: Union[str, None] = 'd6d803865fb3'
+from app.db.models.user import UserRole
+from app.core.security import pwd_context
+
+revision: str = 'db752ee68faa'
+down_revision: Union[str, None] = '7f5278b1e51a'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
 
+def get_password_hash(password: str) -> str:
+    """
+    Копия функции из app.core.security для обеспечения одинакового хеширования
+    """
+    return pwd_context.hash(password)
+
+
 def upgrade() -> None:
-    # Создаем соединение с БД
     bind = op.get_bind()
     Base = declarative_base()
     
-    # Определяем модель User для текущей миграции
     class User(Base):
         __tablename__ = "users"
         
@@ -38,19 +43,17 @@ def upgrade() -> None:
         full_name = sa.Column(sa.String)
         is_active = sa.Column(sa.Boolean, default=True)
     
-    # Создаем сессию
     Session = sessionmaker(bind=bind)
     session = Session()
     
-    # Проверяем, существует ли уже администратор
     admin_exists = session.query(User).filter(User.username == "admin").first()
-    
-    # Если администратор не существует, создаем его
     if not admin_exists:
+        hashed_password = get_password_hash("admin")
+        
         admin = User(
             email="admin@example.com",
             username="admin",
-            hashed_password=get_password_hash("admin"),
+            hashed_password=hashed_password,
             role=UserRole.ADMIN,
             full_name="Администратор",
             is_active=True

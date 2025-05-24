@@ -30,6 +30,7 @@ services:
     container_name: diary
     build: .
     environment:
+      FRONTEND_URL: ${FRONTEND_URL}
       DATABASE_URL: ${DATABASE_URL}
       DATABASE_URL_MIGRATE: ${DATABASE_URL_MIGRATE}
       SECRET_KEY: ${SECRET_KEY}
@@ -44,6 +45,13 @@ services:
       MINIO_PUBLIC_BUCKET: ${MINIO_PUBLIC_BUCKET}
       MINIO_USE_HTTPS: ${MINIO_USE_HTTPS}
       MINIO_EXTERNAL_ENDPOINT: ${MINIO_EXTERNAL_ENDPOINT}
+      MAIL_USERNAME: ${MAIL_USERNAME}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
+      MAIL_FROM: ${MAIL_FROM}
+      MAIL_PORT: ${MAIL_PORT}
+      MAIL_SERVER: ${MAIL_SERVER}
+      MAIL_STARTTLS: ${MAIL_STARTTLS}
+      MAIL_SSL_TLS: ${MAIL_SSL_TLS}
     ports:
       - "8000:${PORT}"
     depends_on:

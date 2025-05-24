@@ -17,8 +17,6 @@ if config.config_file_name is not None:
 
 
 from app.db.base import Base  # noqa
-from app.db.models.user import User
-from app.db.models.diary import Subject, Lesson, Grade, Homework, TeacherSubject
 from app.db.models.class_ import Class
 from app.db.models.user import User, Teacher, Student
 from app.db.models.file import File

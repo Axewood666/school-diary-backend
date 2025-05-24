@@ -1,8 +1,8 @@
-"""Создание начальной структуры
+"""Academic_cycle module
 
-Revision ID: ae7a887dccf6
-Revises: 
-Create Date: 2025-05-17 20:17:43.164627
+Revision ID: d223c079e595
+Revises: e71698381017
+Create Date: 2025-05-21 01:53:37.217740
 
 """
 from typing import Sequence, Union
@@ -12,8 +12,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'ae7a887dccf6'
-down_revision: Union[str, None] = None
+revision: str = 'd223c079e595'
+down_revision: Union[str, None] = 'e71698381017'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

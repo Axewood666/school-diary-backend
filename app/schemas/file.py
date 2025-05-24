@@ -32,10 +32,8 @@ class FileInDBBase(FileBase):
 
 
 class File(FileInDBBase):
-    """Файл для ответа API"""
     url: Optional[str] = None
 
 
 class FileInDB(FileInDBBase):
-    """Файл в БД"""
     pass 

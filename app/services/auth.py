@@ -11,7 +11,9 @@ from app.schemas.auth import Token, UserInviteCreate, AcceptInvite
 from app.services.mailer import MailerService
 from datetime import datetime
 from app.services.helpers import username_from_fio
-from app.schemas.role import StudentInDb, TeacherInDb, UserInDB, UserCreate
+from app.schemas.student import StudentInDb
+from app.schemas.teacher import TeacherInDb
+from app.schemas.user import UserInDB, UserCreate
 from app.db.models.user import UserRole
 from app.db.repositories.user_invites import user_invite_repository
 async def get_user_by_id(db: AsyncSession, user_id: int):

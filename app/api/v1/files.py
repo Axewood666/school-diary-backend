@@ -1,17 +1,17 @@
 
-from fastapi import APIRouter, Depends, UploadFile, File as FastAPIFile, HTTPException
+from fastapi import APIRouter, Depends, UploadFile, File as FastAPIFile
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
 from app.db.session import get_db
 
+from app.db.models.user import UserRole
 from app.db.repositories.file import file_repository
 from app.schemas.file import File, FileCreate
-from app.schemas.response import success_response, error_response
+from app.schemas.base import success_response, error_response
 from app.services.minio import MinioService, get_minio_service
 from app.core.dependencies import get_current_user
-from app.schemas.role import User, UserRole
-
+from app.schemas.user import User
 
 router = APIRouter(tags=["files"])
 

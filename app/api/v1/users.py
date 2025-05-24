@@ -4,11 +4,11 @@ from typing import Union
 
 from app.core.dependencies import get_current_user
 from app.db.session import get_db
-from app.schemas.role import User, UserRole
-from app.schemas.response import (
-    success_response, error_response, ErrorResponse, TeachersListData, UserWithTeacherInfo, AdminsListData,
-    BaseResponse, UsersListData, StudentsListData, UserWithStudentInfo, UserResponse, UserDeactivateData
-)
+
+from app.schemas.base import success_response, error_response, ErrorResponse, BaseResponse
+from app.schemas.responses import TeachersListData, UserWithTeacherInfo, AdminsListData, UsersListData, StudentsListData, UserWithStudentInfo
+from app.schemas.user import User, UserRole, UserDeactivateData, UserResponse
+
 from app.db.repositories.user import user_repository
 from typing import List
 
@@ -70,7 +70,7 @@ async def get_user_students(
         
         return success_response(
             data={
-                "students": students_data,
+                "items": students_data,
                 "pagination": {
                     "skip": skip,
                     "limit": limit,
@@ -171,7 +171,7 @@ async def get_user_teachers(
         
         return success_response(
             data={
-                "teachers": teachers_data,
+                "items": teachers_data,
                 "pagination": {
                     "skip": skip,
                     "limit": limit,
@@ -253,7 +253,7 @@ async def get_user_admins(
         
         return success_response(
             data={
-                "admins": admins[skip:skip+limit],
+                "items": admins[skip:skip+limit],
                 "pagination": {
                     "skip": skip,
                     "limit": limit,
@@ -318,7 +318,7 @@ async def get_users(
         
         return success_response(
             data={
-                "users": users[skip:skip+limit],
+                "items": users[skip:skip+limit],
                 "pagination": {
                     "skip": skip,
                     "limit": limit,

@@ -5,16 +5,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.dependencies import get_current_user
 from app.db.session import get_db
 
-from app.schemas.auth import UserInviteCreate, UserRole, AcceptInvite, UserInviteInfo, InviteValidationData
-from app.schemas.role import User
-from app.schemas.response import (
-    success_response, error_response, ErrorResponse, BaseResponse,
-    LoginSuccessResponse, InviteListData
-)
+from app.schemas.base import success_response, error_response, ErrorResponse, BaseResponse
+from app.schemas.auth import UserInviteCreate, AcceptInvite, UserInviteInfo, InviteValidationData
+from app.schemas.responses import LoginSuccessResponse, InviteListData
 
 from app.services.auth import authenticate_user, create_user_token, create_user_invite, invite_accept_process
 from app.services.mailer import get_mailer_service, MailerService
 from app.db.repositories.user_invites import user_invite_repository
+from app.db.models.user import User, UserRole
 
 from typing import Union
 
@@ -112,7 +110,7 @@ async def get_invites(skip: int = 0, limit: int = 100, db: AsyncSession = Depend
 
         return success_response(
             data={
-                "invites": invites_list,
+                "items": invites_list,
                 "pagination": {
                     "skip": skip,
                     "limit": limit,

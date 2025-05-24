@@ -1,15 +1,18 @@
 from typing import Optional
 
-from sqlalchemy import select, update
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-import uuid
 
-from app.schemas.role import UserRole
+from app.db.models.user import UserRole
 from app.db.base import BaseRepository
-from app.db.models.user import User, UserInvite, Student, Teacher
-from app.schemas.role import StudentInDb, TeacherInDb, UserBase, UserCreate, UserUpdate, UserStudent, UserTeacher
+from app.db.models.user import User, Student, Teacher
+from app.schemas.user import UserCreate, UserUpdate
+from app.schemas.student import StudentInDb, UserStudent
+from app.schemas.teacher import TeacherInDb, UserTeacher
+
 from typing import List
 from sqlalchemy.orm import selectinload
+
 class UserRepository(BaseRepository[User, UserCreate, UserUpdate]):
     async def get_by_email(self, db: AsyncSession, *, email: str) -> Optional[User]:
         query = select(User).where(User.email == email)

@@ -13,7 +13,6 @@ class Student(StudentBase):
 
 class StudentInDb(StudentBase):
     user_id: int
-    id: int
 
 class StudentCreate(StudentBase):
     user_id: int

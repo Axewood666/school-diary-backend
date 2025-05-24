@@ -2,7 +2,7 @@ from pydantic_settings import BaseSettings
 import os
 from pydantic import model_validator
 from typing import Optional
-import math
+
 
 class Settings(BaseSettings):
     PROJECT_NAME: str = os.getenv("PROJECT_NAME", "School API")

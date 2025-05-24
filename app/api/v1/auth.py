@@ -6,7 +6,7 @@ from app.core.dependencies import get_current_user
 from app.db.session import get_db
 
 from app.schemas.base import success_response, error_response, ErrorResponse, BaseResponse
-from app.schemas.auth import UserInviteCreate, AcceptInvite, UserInviteInfo, InviteValidationData
+from app.schemas.auth import UserInviteCreate, AcceptInvite, UserInviteInfo, InviteValidationData, Token
 from app.schemas.responses import LoginSuccessResponse, InviteListData
 
 from app.services.auth import authenticate_user, create_user_token, create_user_invite, invite_accept_process
@@ -15,6 +15,12 @@ from app.db.repositories.user_invites import user_invite_repository
 from app.db.models.user import User, UserRole
 
 from typing import Union
+import logging
+from app.core.logger import setup_logging
+
+setup_logging()
+logger = logging.getLogger("app")
+
 
 router = APIRouter(tags=["auth"])
 
@@ -38,6 +44,7 @@ async def login(
             result=True)
 
     except Exception as e:
+        logger.error(f"LOGIN_ERROR: {e}")
         return error_response(
             message="Login failed",
             error_code="LOGIN_ERROR"
@@ -65,13 +72,14 @@ async def invite_user(
             message="User invited successfully"
         )
     except Exception as e:
+        logger.error(f"INVITE_ERROR: {e}")
         return error_response(
             message="Failed to invite user",
             error_code="INVITE_ERROR"
         )
 
 
-@router.post("/invite/accept", response_model=Union[BaseResponse[UserInviteInfo], ErrorResponse])
+@router.post("/invite/accept", response_model=Union[BaseResponse[Token], ErrorResponse])
 async def accept_invite(accept_invite: AcceptInvite, db: AsyncSession = Depends(get_db)):
     """Accept invite"""
     try:
@@ -82,6 +90,7 @@ async def accept_invite(accept_invite: AcceptInvite, db: AsyncSession = Depends(
             message="Invite accepted successfully"
         )
     except Exception as e:
+        logger.error(f"INVITE_ACCEPT_ERROR: {e}")
         return error_response(
             message="Failed to accept invite",
             error_code="INVITE_ACCEPT_ERROR"
@@ -119,6 +128,7 @@ async def get_invites(skip: int = 0, limit: int = 100, db: AsyncSession = Depend
             },
             message="Invites retrieved successfully" )
     except Exception as e:
+        logger.error(f"GET_INVITES_ERROR: {e}")
         return error_response(
             message="Failed to retrieve invites",
             error_code="GET_INVITES_ERROR"
@@ -164,6 +174,7 @@ async def is_valid_invite(token: str, db: AsyncSession = Depends(get_db)):
             message="Invite is valid"
         )
     except Exception as e:
+        logger.error(f"INVITE_VALIDATION_ERROR: {e}")
         return error_response(
             message="Failed to validate invite",
             error_code="INVITE_VALIDATION_ERROR"

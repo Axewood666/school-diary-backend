@@ -28,7 +28,6 @@ class User(UserInDBBase):
     id: int
 
 class UserInDB(UserInDBBase):
-    id: int
     hashed_password: str
 
 class UserDeactivateData(BaseModel):

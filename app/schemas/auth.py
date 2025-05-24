@@ -30,8 +30,6 @@ class UserInviteCreate(UserInviteRequest):
 class AcceptInvite(BaseModel):
     token: str
     password: str
-    class Config:
-        from_attributes = True
 
 class UserInviteInfo(BaseModel):
     role: UserRole

@@ -10,7 +10,11 @@ from app.schemas.responses import TeachersListData, UserWithTeacherInfo, AdminsL
 from app.schemas.user import User, UserRole, UserDeactivateData, UserResponse
 
 from app.db.repositories.user import user_repository
-from typing import List
+import logging
+from app.core.logger import setup_logging
+
+setup_logging()
+logger = logging.getLogger("app")
 
 router = APIRouter(tags=["users"])
 
@@ -80,6 +84,7 @@ async def get_user_students(
             message="Students retrieved successfully"
         )
     except Exception as e:
+        logger.error(f"GET_STUDENTS_ERROR: {e}")
         return error_response(
             message="Failed to retrieve students",
             error_code="GET_STUDENTS_ERROR"
@@ -128,6 +133,7 @@ async def get_user_student(
             message="Student retrieved successfully"
         )
     except Exception as e:
+        logger.error(f"GET_STUDENT_ERROR: {e}")
         return error_response(
             message="Failed to retrieve student",
             error_code="GET_STUDENT_ERROR"
@@ -181,6 +187,7 @@ async def get_user_teachers(
             message="Teachers retrieved successfully"
         )
     except Exception as e:
+        logger.error(f"GET_TEACHERS_ERROR: {e}")
         return error_response(
             message="Failed to retrieve teachers",
             error_code="GET_TEACHERS_ERROR"
@@ -229,6 +236,7 @@ async def get_user_teacher(
             message="Teacher retrieved successfully"
         )
     except Exception as e:
+        logger.error(f"GET_TEACHER_ERROR: {e}")
         return error_response(
             message="Failed to retrieve teacher",
             error_code="GET_TEACHER_ERROR"
@@ -263,6 +271,7 @@ async def get_user_admins(
             message="Admins retrieved successfully"
         )
     except Exception as e:
+        logger.error(f"GET_ADMINS_ERROR: {e}")
         return error_response(
             message="Failed to retrieve admins",
             error_code="GET_ADMINS_ERROR"
@@ -294,6 +303,7 @@ async def get_user_admin(
             message="Admin retrieved successfully"
         )
     except Exception as e:
+        logger.error(f"GET_ADMIN_ERROR: {e}")
         return error_response(
             message="Failed to retrieve admin",
             error_code="GET_ADMIN_ERROR"
@@ -328,6 +338,7 @@ async def get_users(
             message="Users retrieved successfully"
         )
     except Exception as e:
+        logger.error(f"GET_USERS_ERROR: {e}")
         return error_response(
             message="Failed to retrieve users",
             error_code="GET_USERS_ERROR"
@@ -359,6 +370,7 @@ async def get_user(
             message="User retrieved successfully"
         )
     except Exception as e:
+        logger.error(f"GET_USER_ERROR: {e}")
         return error_response(
             message="Failed to retrieve user",
             error_code="GET_USER_ERROR"
@@ -402,6 +414,7 @@ async def deactivate_user(
             message="User deactivated successfully"
         )
     except Exception as e:
+        logger.error(f"DEACTIVATE_USER_ERROR: {e}")
         return error_response(
             message="Failed to deactivate user",
             error_code="DEACTIVATE_USER_ERROR"

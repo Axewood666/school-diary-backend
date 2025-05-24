@@ -13,8 +13,7 @@ class Teacher(TeacherBase):
 
 class TeacherInDb(TeacherBase):
     user_id: int
-    id: int
-
+    
 class TeacherCreate(TeacherBase):
     user_id: int
 

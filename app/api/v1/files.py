@@ -12,6 +12,11 @@ from app.schemas.base import success_response, error_response
 from app.services.minio import MinioService, get_minio_service
 from app.core.dependencies import get_current_user
 from app.schemas.user import User
+import logging
+from app.core.logger import setup_logging
+
+setup_logging()
+logger = logging.getLogger("app")
 
 router = APIRouter(tags=["files"])
 
@@ -62,6 +67,7 @@ async def upload_file(
             message="File uploaded successfully"
         )
     except Exception as e:
+        logger.error(f"FILE_UPLOAD_ERROR: {e}")
         return error_response(
             message=f"Failed to upload file: {str(e)}",
             error_code="FILE_UPLOAD_ERROR"
@@ -96,6 +102,7 @@ async def get_file_by_id(
             message="File retrieved successfully"
         )
     except Exception as e:
+        logger.error(f"GET_FILE_ERROR: {e}")
         return error_response(
             message=f"Failed to retrieve file: {str(e)}",
             error_code="GET_FILE_ERROR"
@@ -134,6 +141,7 @@ async def delete_file(
             message="File deleted successfully"
         )
     except Exception as e:
+        logger.error(f"DELETE_FILE_ERROR: {e}")
         return error_response(
             message=f"Failed to delete file: {str(e)}",
             error_code="DELETE_FILE_ERROR"

@@ -24,6 +24,7 @@ class Settings(BaseSettings):
     MINIO_USE_HTTPS: bool = os.getenv("MINIO_USE_HTTPS", "false").lower() == "true"
     MINIO_REDIRECT_USE_HTTPS: bool = os.getenv("MINIO_REDIRECT_USE_HTTPS", "false").lower() == "true"
     MINIO_EXTERNAL_ENDPOINT: str = os.getenv("MINIO_EXTERNAL_ENDPOINT", "")
+    MAX_FILE_SIZE: int = os.getenv("MAX_FILE_SIZE", 52428800)
     
     @model_validator(mode='after')
     def set_minio_external_endpoint(self) -> 'Settings':

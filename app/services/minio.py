@@ -10,6 +10,9 @@ from minio.error import S3Error
 
 from app.core.config import settings
 
+import re
+from transliterate import translit
+
 
 class MinioService:
     def __init__(
@@ -28,7 +31,7 @@ class MinioService:
         )
         self.external_endpoint = external_endpoint
         self.secure = settings.MINIO_REDIRECT_USE_HTTPS
-        
+    
     async def ensure_bucket_exists(self, bucket_name: str, make_public: bool = False) -> None:
         """Проверяет существование бакета и создает его при необходимости"""
         try:
@@ -53,7 +56,22 @@ class MinioService:
                 status_code=500, 
                 detail=f"Ошибка при создании бакета: {err}"
             )
-    
+            
+    @staticmethod
+    def _sanitize_filename(filename: str) -> str:
+        try:
+            filename = translit(filename, 'ru', reversed=True)
+        except:
+            pass
+        
+        filename = filename.replace(' ', '_')
+        
+        filename = re.sub(r'[^\w\-\.]', '', filename)
+        
+        filename = re.sub(r'[\-_]+', '_', filename)
+        
+        return filename
+
     async def upload_file(
         self, 
         file: UploadFile, 

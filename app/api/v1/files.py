@@ -31,14 +31,15 @@ async def upload_file(
     try:
         file_data = await file.read()
         file_size = len(file_data)
-        if file_size > 50 * 1024 * 1024: 
+        if file_size > settings.MAX_FILE_SIZE: 
             return error_response(
-                message="File size exceeds maximum limit of 50MB",
+                message=f"File size exceeds maximum limit of {settings.MAX_FILE_SIZE}MB",
                 error_code="FILE_TOO_LARGE"
             )
         
         await file.seek(0)
         
+        file.filename = minio_service._sanitize_filename(file.filename)
         object_name = await minio_service.upload_file(
             file=file
         )

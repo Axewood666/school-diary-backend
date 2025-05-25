@@ -39,22 +39,42 @@ async def get_current_user_info(
 async def get_user_students(
     skip: int = 0,
     limit: int = 100,
+    class_id: int = None,
+    teacher_id: int = None,
+    search: str = None,
+    order_by: str = "created_at",
+    order_direction: str = "desc",
+    is_active: bool = None,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
     """Get all students"""
     try:
+        teacher = None
         if current_user.role == UserRole.TEACHER:
-            pass
+            teacher_id = current_user.id
+            teacher = await user_repository.get_user_teacher(db=db, user_id=current_user.id)
         elif current_user.role != UserRole.ADMIN:
             return error_response(
                 message="You are not allowed to access this resource",
                 error_code="INSUFFICIENT_PERMISSIONS"
             )
-        students = await user_repository.get_all_students(db=db)
-        students_data = []
         
-        for student in students[skip:skip+limit]:
+        students = await user_repository.get_students(
+            db=db, 
+            teacher=teacher,
+            class_id=class_id, 
+            teacher_id=teacher_id, 
+            search=search, 
+            order_by=order_by, 
+            order_direction=order_direction, 
+            is_active=is_active,
+            skip=skip,
+            limit=limit
+        )
+            
+        students_data = []
+        for student in students:
             students_data.append({
                 "user_info": {
                     "id": student.user.id,
@@ -98,17 +118,39 @@ async def get_user_student(
 ):
     """Get user student"""
     try:
-        if current_user.role != UserRole.ADMIN:
-            return error_response(
-                message="You are not allowed to access this resource",
-                error_code="INSUFFICIENT_PERMISSIONS"
-            )
-        
         student = await user_repository.get_user_student(db=db, user_id=user_id)
         if not student:
             return error_response(
                 message="User student not found",
                 error_code="STUDENT_NOT_FOUND"
+            )
+
+        if current_user.role == UserRole.ADMIN:
+            pass
+        elif current_user.role == UserRole.STUDENT:
+            if current_user.id != user_id:
+                return error_response(
+                    message="You are not allowed to access this resource",
+                    error_code="INSUFFICIENT_PERMISSIONS"
+                )
+        elif current_user.role == UserRole.TEACHER:
+            teacher = await user_repository.get_user_teacher(db=db, user_id=current_user.id)
+            
+            is_class_teacher = teacher.class_id == student.class_id
+            
+            has_lessons = False
+            if student.class_id:
+                has_lessons = await user_repository.is_class_teacher(db=db, user_id=current_user.id, class_id=student.class_id)
+                
+            if not (is_class_teacher or has_lessons):
+                return error_response(
+                    message="You are not allowed to access this resource",
+                    error_code="INSUFFICIENT_PERMISSIONS"
+                )
+        else:
+            return error_response(
+                message="You are not allowed to access this resource",
+                error_code="INSUFFICIENT_PERMISSIONS"
             )
         
         student_data = {
@@ -143,6 +185,11 @@ async def get_user_student(
 async def get_user_teachers(
     skip: int = 0,
     limit: int = 100,
+    search: str = None,
+    order_by: str = "created_at",
+    order_direction: str = "desc",
+    is_active: bool = None,
+    class_id: int = None,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
@@ -154,10 +201,10 @@ async def get_user_teachers(
                 error_code="INSUFFICIENT_PERMISSIONS"
             )
         
-        teachers = await user_repository.get_all_teachers(db=db)
+        teachers = await user_repository.get_teachers(db=db, search=search, order_by=order_by, order_direction=order_direction, is_active=is_active, class_id=class_id, skip=skip, limit=limit)
         teachers_data = []
         
-        for teacher in teachers[skip:skip+limit]:
+        for teacher in teachers:
             teachers_data.append({
                 "user_info": {
                     "id": teacher.user.id,
@@ -247,7 +294,11 @@ async def get_user_admins(
     skip: int = 0,
     limit: int = 100,
     current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    search: str = None,
+    order_by: str = "created_at",
+    order_direction: str = "desc",
+    is_active: bool = None
 ):
     """Get all admins"""
     try:
@@ -257,7 +308,7 @@ async def get_user_admins(
                 error_code="INSUFFICIENT_PERMISSIONS"
             )
         
-        admins = await user_repository.get_all_admins(db=db)
+        admins = await user_repository.get_users(role=UserRole.ADMIN, db=db, search=search, order_by=order_by, order_direction=order_direction, is_active=is_active, skip=skip, limit=limit)
         
         return success_response(
             data={
@@ -314,7 +365,12 @@ async def get_users(
     skip: int = 0,
     limit: int = 100,
     current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    search: str = None,
+    order_by: str = "created_at",
+    order_direction: str = "desc",
+    is_active: bool = None,
+    role: UserRole = None
 ):
     """Get all users"""
     try:
@@ -324,7 +380,7 @@ async def get_users(
                 error_code="INSUFFICIENT_PERMISSIONS"
             )
         
-        users = await user_repository.get_all(db=db)
+        users = await user_repository.get_users(db=db, search=search, order_by=order_by, order_direction=order_direction, is_active=is_active, role=role, skip=skip, limit=limit)
         
         return success_response(
             data={

@@ -1,5 +1,5 @@
 from app.db.base import Base
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Boolean, Text
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Boolean, Text, Time
 from sqlalchemy.orm import relationship
 from datetime import datetime
 
@@ -9,8 +9,8 @@ class LessonTimes(Base):
     id = Column(Integer, primary_key=True, index=True)
     period_id = Column(Integer, ForeignKey("academic_periods.id"), nullable=False)
     lesson_num = Column(Integer, nullable=False)
-    start_time = Column(DateTime, nullable=False)
-    end_time = Column(DateTime, nullable=False)
+    start_time = Column(Time, nullable=False)
+    end_time = Column(Time, nullable=False)
     created_at = Column(DateTime, default=datetime.now)
 
     period = relationship("AcademicPeriod", back_populates="lesson_times")

@@ -11,17 +11,12 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 
 config = context.config
-config.set_main_option('sqlalchemy.url', settings.DATABASE_URL_MIGRATE)# Настройка логгирования
+config.set_main_option('sqlalchemy.url', settings.DATABASE_URL_MIGRATE)
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
 
-from app.db.base import Base  # noqa
-from app.db.models.class_ import Class
-from app.db.models.user import User, Teacher, Student
-from app.db.models.file import File
-
-
+from app.db.base import Base
 target_metadata = Base.metadata
 
 def run_migrations_offline():

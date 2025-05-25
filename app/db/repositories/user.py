@@ -84,8 +84,10 @@ class UserRepository(BaseRepository[User, UserCreate, UserUpdate]):
                     Student.class_id == teacher.class_id
                 )
             )
-        
-        if class_id:
+    
+        if class_id is not None:
+            if class_id == 0:
+                class_id = None
             query = query.where(Student.class_id == class_id)
             
         if teacher_id:
@@ -109,25 +111,25 @@ class UserRepository(BaseRepository[User, UserCreate, UserUpdate]):
             query = query.where(Student.user.has(User.is_active == is_active))
         
         if order_by == "created_at":
-            if order_direction == "desc":
-                query = query.order_by(Student.user.has(User.created_at.desc()))
-            else:
-                query = query.order_by(Student.user.has(User.created_at.asc()))
+            query = query.join(Student.user).order_by(
+                User.created_at.desc() if order_direction == "desc" 
+                else User.created_at.asc()
+        )
         elif order_by == "class_id":
-            if order_direction == "desc":
-                query = query.order_by(Student.class_id.desc())
-            else:
-                query = query.order_by(Student.class_id.asc())
+            query = query.order_by(
+                Student.class_id.desc() if order_direction == "desc" 
+                else Student.class_id.asc()
+            )
+        elif order_by == "id" or order_by == "user_id":
+            query = query.order_by(
+                Student.user_id.desc() if order_direction == "desc" 
+                else Student.user_id.asc()
+            )
         elif order_by == "full_name":
-            if order_direction == "desc":
-                query = query.order_by(Student.user.has(User.full_name.desc()))
-            else:
-                query = query.order_by(Student.user.has(User.full_name.asc()))
-        elif order_by == "id":
-            if order_direction == "desc":
-                query = query.order_by(Student.user.has(User.id.desc()))
-            else:
-                query = query.order_by(Student.user.has(User.id.asc()))
+            query = query.join(Student.user).order_by(
+                User.full_name.desc() if order_direction == "desc" 
+                else User.full_name.asc()
+            )
                 
         query = query.offset(skip).limit(limit)
         result = await db.execute(query)
@@ -138,37 +140,40 @@ class UserRepository(BaseRepository[User, UserCreate, UserUpdate]):
         if search:
             query = query.where(Teacher.user.has(User.full_name.ilike(f"%{search}%")))
         
+        if class_id is not None:
+            if class_id == 0:
+                class_id = None
+            query = query.where(Teacher.class_id == class_id)
+            
         if is_active is not None:
             query = query.where(Teacher.user.has(User.is_active == is_active))
             
         if order_by == "created_at":
-            if order_direction == "desc":
-                query = query.order_by(Teacher.user.has(User.created_at.desc()))
-            else:
-                query = query.order_by(Teacher.user.has(User.created_at.asc()))
+            query = query.join(Teacher.user).order_by(
+                User.created_at.desc() if order_direction == "desc" 
+                else User.created_at.asc()
+        )
         elif order_by == "class_id":
-            if order_direction == "desc":
-                query = query.order_by(Teacher.class_id.desc())
-            else:
-                query = query.order_by(Teacher.class_id.asc())
-        elif order_by == "id":
-            if order_direction == "desc":
-                query = query.order_by(Teacher.user.has(User.id.desc()))
-            else:
-                query = query.order_by(Teacher.user.has(User.id.asc()))
+            query = query.order_by(
+                Teacher.class_id.desc() if order_direction == "desc" 
+                else Teacher.class_id.asc()
+            )
+        elif order_by == "id" or order_by == "user_id":
+            query = query.order_by(
+                Teacher.user_id.desc() if order_direction == "desc" 
+                else Teacher.user_id.asc()
+            )
         elif order_by == "full_name":
-            if order_direction == "desc":
-                query = query.order_by(Teacher.user.has(User.full_name.desc()))
-            else:
-                query = query.order_by(Teacher.user.has(User.full_name.asc()))
-        
-        if class_id:
-            query = query.where(Teacher.class_id == class_id)
+            query = query.join(Teacher.user).order_by(
+                User.full_name.desc() if order_direction == "desc" 
+                else User.full_name.asc()
+            )
 
         query = query.offset(skip).limit(limit)
 
         result = await db.execute(query)
         return result.scalars().all()
+
     async def is_class_teacher(self, db: AsyncSession, user_id: int, class_id: int) -> bool:
         query = select(Schedule).where(
             Schedule.teacher_id == user_id,

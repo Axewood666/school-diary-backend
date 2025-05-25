@@ -4,6 +4,7 @@ from app.schemas.auth import Token, UserInviteInfo
 from app.schemas.user import User
 from app.schemas.student import UserWithStudentInfo
 from app.schemas.teacher import UserWithTeacherInfo
+from pydantic import BaseModel
 
 class LoginSuccessResponse(Token):
     result: bool = True
@@ -16,6 +17,10 @@ class UsersListData(PaginatedResponse[User]):
 
 class StudentsListData(PaginatedResponse[UserWithStudentInfo]):
     pass
+
+class UpdatedClassStudentsListData(BaseModel):
+    added_students: List[UserWithStudentInfo]
+    removed_students: List[UserWithStudentInfo]
 
 class TeachersListData(PaginatedResponse[UserWithTeacherInfo]):
     pass

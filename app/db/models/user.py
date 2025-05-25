@@ -30,6 +30,7 @@ class Student(Base):
 
     user_id = Column(Integer, ForeignKey("users.id"), primary_key=True, index=True)
     class_id = Column(Integer, ForeignKey("classes.id"), nullable=True)
+    admission_year = Column(Integer, nullable=True)
     parent_phone = Column(String, nullable=True)
     parent_email = Column(String, nullable=True)
     parent_fio = Column(String, nullable=True)
@@ -38,6 +39,7 @@ class Student(Base):
     class_ = relationship("Class", back_populates="students")
     homework = relationship("Homework", back_populates="student")
     grades = relationship("Grade", back_populates="student")
+    class_history = relationship("StudentClassHistory", back_populates="student")
 
 class Teacher(Base):
     __tablename__ = "teachers"

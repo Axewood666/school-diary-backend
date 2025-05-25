@@ -19,6 +19,10 @@ class Subject(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False)
     created_at = Column(DateTime, default=datetime.now)
+    back_ground_color = Column(String, nullable=True)
+    border_color = Column(String, nullable=True)
+    text_color = Column(String, nullable=True)
+    icon = Column(String, nullable=True)
     
     teacher_subjects = relationship("TeacherSubject", back_populates="subject")
     homework = relationship("Homework", back_populates="subject")

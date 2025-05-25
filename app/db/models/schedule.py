@@ -26,8 +26,10 @@ class Schedule(Base):
     subject_id = Column(Integer, ForeignKey("subjects.id"), nullable=False)
     created_at = Column(DateTime, default=datetime.now)
     day_of_week = Column(Integer, nullable=False)
-    room_id = Column(String, nullable=True)
+    location = Column(String, nullable=True)
+    description = Column(String, nullable=True)
     is_replacement = Column(Boolean, default=False)
+    is_cancelled = Column(Boolean, default=False)
     original_teacher_id = Column(Integer, ForeignKey("teachers.user_id"), nullable=True)
 
     week = relationship("AcademicWeek", back_populates="schedule")

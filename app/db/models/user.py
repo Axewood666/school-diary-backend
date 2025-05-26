@@ -22,8 +22,8 @@ class User(Base):
     created_at = Column(DateTime, default=datetime.now)
     updated_at = Column(DateTime, default=datetime.now)
     
-    student = relationship("Student", back_populates="user")
-    teacher = relationship("Teacher", back_populates="user")
+    student = relationship("Student", back_populates="user", uselist=False)
+    teacher = relationship("Teacher", back_populates="user", uselist=False)
 
 class Student(Base):
     __tablename__ = "students"
@@ -35,8 +35,8 @@ class Student(Base):
     parent_email = Column(String, nullable=True)
     parent_fio = Column(String, nullable=True)
 
-    user = relationship("User", back_populates="student")
-    class_ = relationship("Class", back_populates="students")
+    user = relationship("User", back_populates="student", uselist=False)
+    class_ = relationship("Class", back_populates="students", uselist=False)
     homework = relationship("Homework", back_populates="student")
     grades = relationship("Grade", back_populates="student")
     class_history = relationship("StudentClassHistory", back_populates="student")
@@ -50,8 +50,8 @@ class Teacher(Base):
     experience = Column(Integer, nullable=True)
     bio = Column(String, nullable=True)
 
-    user = relationship("User", back_populates="teacher")
-    class_ = relationship("Class", back_populates="teacher")
+    user = relationship("User", back_populates="teacher", uselist=False)
+    class_ = relationship("Class", back_populates="teacher", uselist=False)
     teacher_subjects = relationship("TeacherSubject", back_populates="teacher")
     homework = relationship("Homework", back_populates="teacher")
     grades = relationship("Grade", back_populates="teacher")

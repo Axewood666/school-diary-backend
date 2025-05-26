@@ -135,11 +135,15 @@ class UserRepository(BaseRepository[User, UserCreate, UserUpdate]):
         result = await db.execute(query)
         return result.scalars().all()
     
-    async def get_teachers(self, db: AsyncSession, skip: int = 0, limit: int = 100, search: Optional[str] = None, order_by: str = "created_at", order_direction: str = "desc", is_active: Optional[bool] = None, class_id: Optional[int] = None) -> List[UserTeacher]:
+    async def get_teachers(self, db: AsyncSession, skip: int = 0, limit: int = 100, 
+                            search: Optional[str] = None, 
+                            order_by: str = "created_at", order_direction: str = "desc",
+                            is_active: Optional[bool] = None,
+                            class_id: Optional[int] = None) -> List[UserTeacher]:
         query = select(Teacher).options(selectinload(Teacher.user))
         if search:
             query = query.where(Teacher.user.has(User.full_name.ilike(f"%{search}%")))
-        
+            
         if class_id is not None:
             if class_id == 0:
                 class_id = None
@@ -182,7 +186,11 @@ class UserRepository(BaseRepository[User, UserCreate, UserUpdate]):
         result = await db.execute(query)
         return result.first() is not None
     
-    async def get_users(self, db: AsyncSession, skip: int = 0, limit: int = 100, search: Optional[str] = None, order_by: str = "created_at", order_direction: str = "desc", is_active: Optional[bool] = None, role: Optional[UserRole] = None) -> List[User]:
+    async def get_users(self, db: AsyncSession, skip: int = 0, limit: int = 100, 
+                        search: Optional[str] = None, 
+                        order_by: str = "created_at", order_direction: str = "desc", 
+                        is_active: Optional[bool] = None, 
+                        role: Optional[UserRole] = None) -> List[User]:
         query = select(User)
         
         if role:

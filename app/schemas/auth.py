@@ -40,6 +40,9 @@ class UserInviteInfo(BaseModel):
     is_sent: bool
     used_at: Optional[datetime] = None
     
+    class Config:
+        from_attributes = True
+        
 class UserInviteUpdate(BaseModel):
     is_sent: Optional[bool]
     used_at: Optional[datetime]

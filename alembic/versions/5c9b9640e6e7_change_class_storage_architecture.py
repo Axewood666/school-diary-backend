@@ -78,4 +78,5 @@ def downgrade() -> None:
     op.drop_table('student_class_history')
     op.drop_index(op.f('ix_class_promotions_id'), table_name='class_promotions')
     op.drop_table('class_promotions')
+    op.execute('DROP TYPE IF EXISTS studentclasshistoryreason')
     # ### end Alembic commands ###

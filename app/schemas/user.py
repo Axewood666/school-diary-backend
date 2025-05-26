@@ -11,6 +11,9 @@ class UserBase(BaseModel):
 
 class UserResponse(UserBase):
     id: int
+    
+    class Config:
+        from_attributes = True
 
 class UserCreate(UserBase):
     email: EmailStr

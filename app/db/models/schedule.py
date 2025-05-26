@@ -35,7 +35,6 @@ class Schedule(Base):
     week = relationship("AcademicWeek", back_populates="schedule")
     lesson_time = relationship("LessonTimes", back_populates="schedule")
     class_ = relationship("Class", back_populates="schedule")
-    teacher = relationship("Teacher", back_populates="schedule")
     subject = relationship("Subject", back_populates="schedule")
     homework = relationship("Homework", back_populates="schedule")
     grades = relationship("Grade", back_populates="schedule")

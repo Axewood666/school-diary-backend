@@ -4,6 +4,8 @@ from sqlalchemy.orm import relationship
 from datetime import datetime
 from sqlalchemy.types import Enum as SQLAlchemyEnum
 from enum import Enum as PythonEnum
+from sqlalchemy.dialects.postgresql import ARRAY
+from sqlalchemy.ext.asyncio import AsyncSession
 
 class StudentClassHistoryReason(PythonEnum):
     ADMISSION = "admission"
@@ -23,16 +25,22 @@ class Class(Base):
     
     year = relationship("AcademicYear", back_populates="classes")
     students = relationship("Student", back_populates="class_")
-    teacher = relationship("Teacher", back_populates="class_")
+    teacher = relationship("Teacher", back_populates="class_", uselist=False)
     schedule = relationship("Schedule", back_populates="class_")
-    class_history = relationship("StudentClassHistory", back_populates="student")
+    class_history = relationship("StudentClassHistory", back_populates="class_")
+    promotions_from = relationship("ClassPromotion", back_populates="from_class", foreign_keys="[ClassPromotion.from_class_id]")
+    promotions_to = relationship("ClassPromotion", back_populates="to_class", foreign_keys="[ClassPromotion.to_class_id]")
+    
+    @property
+    def students_count(self):
+        return len(self.students)
 
 class StudentClassHistory(Base):
     __tablename__ = "student_class_history"
 
     id = Column(Integer, primary_key=True, index=True)
     student_id = Column(Integer, ForeignKey("students.user_id"), nullable=False)
-    class_id = Column(Integer, ForeignKey("classes.id"), nullable=False)
+    class_id = Column(Integer, ForeignKey("classes.id"), nullable=True)
     start_date = Column(DateTime, nullable=False, default=datetime.now)
     end_date = Column(DateTime, nullable=True)
     reason = Column(SQLAlchemyEnum(StudentClassHistoryReason), nullable=True)
@@ -53,3 +61,18 @@ class ClassPromotion(Base):
 
     from_class = relationship("Class", foreign_keys=[from_class_id], back_populates="promotions_from")
     to_class = relationship("Class", foreign_keys=[to_class_id], back_populates="promotions_to")
+    
+    def write_promotion(self, db: AsyncSession, from_class_id: int, to_class_id: int):
+        self.from_class_id = from_class_id
+        self.to_class_id = to_class_id
+        db.add(self)
+        db.commit()
+    
+class ClassTemplate(Base):
+    __tablename__ = "class_templates"
+
+    id = Column(Integer, primary_key=True, index=True)
+    grade_levels = Column(ARRAY(Integer), nullable=False)
+    letters = Column(ARRAY(String(1)), nullable=False)
+    specializations = Column(ARRAY(String), nullable=False)
+    created_at = Column(DateTime, default=datetime.now)

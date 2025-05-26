@@ -11,6 +11,9 @@ class TeacherBase(BaseModel):
 class Teacher(TeacherBase):
     pass
 
+    class Config:
+        from_attributes = True
+
 class TeacherInDb(TeacherBase):
     user_id: int
     
@@ -24,5 +27,5 @@ class UserWithTeacherInfo(BaseModel):
     user_info: UserResponse
     teacher_info: Teacher
 
-class UserTeacher(UserBase, TeacherBase):
+class UserTeacher(UserResponse, TeacherBase):
     pass 

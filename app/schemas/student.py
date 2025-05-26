@@ -11,6 +11,9 @@ class StudentBase(BaseModel):
 class Student(StudentBase):
     pass
 
+    class Config:
+        from_attributes = True
+
 class StudentInDb(StudentBase):
     user_id: int
 

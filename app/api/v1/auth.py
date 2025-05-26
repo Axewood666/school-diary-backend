@@ -98,7 +98,8 @@ async def accept_invite(accept_invite: AcceptInvite, db: AsyncSession = Depends(
     
     
 @router.get("/invite/list", response_model=Union[BaseResponse[InviteListData], ErrorResponse])
-async def get_invites(skip: int = 0, limit: int = 100, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
+async def get_invites(skip: int = 0, limit: int = 100, 
+                        db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
     """Get all invites"""
     try:
         if current_user.role != UserRole.ADMIN:
@@ -108,14 +109,7 @@ async def get_invites(skip: int = 0, limit: int = 100, db: AsyncSession = Depend
             )
         
         invites = await user_invite_repository.get_multi(db=db, skip=skip, limit=limit)
-        invites_list = [UserInviteInfo(
-            role=invite.role,
-            full_name=invite.full_name,
-            email=invite.email,
-            created_at=invite.created_at,
-            expires_at=invite.expires_at,
-            is_sent=invite.is_sent,
-            used_at=invite.used_at) for invite in invites]
+        invites_list = [UserInviteInfo.model_validate(invite) for invite in invites]
 
         return success_response(
             data={

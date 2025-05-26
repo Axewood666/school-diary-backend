@@ -25,7 +25,9 @@ class Class(Base):
     students = relationship("Student", back_populates="class_")
     teacher = relationship("Teacher", back_populates="class_")
     schedule = relationship("Schedule", back_populates="class_")
-    class_history = relationship("StudentClassHistory", back_populates="student")
+    class_history = relationship("StudentClassHistory", back_populates="class_")
+    promotions_from = relationship("ClassPromotion", foreign_keys="ClassPromotion.from_class_id", back_populates="from_class")
+    promotions_to = relationship("ClassPromotion", foreign_keys="ClassPromotion.to_class_id", back_populates="to_class")
 
 class StudentClassHistory(Base):
     __tablename__ = "student_class_history"

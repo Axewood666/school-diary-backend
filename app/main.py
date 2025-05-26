@@ -9,7 +9,7 @@ import logging
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
-    openapi_url=f"{settings.API_V1_STR}/openapi.json"
+    openapi_url=f"{settings.API_V1_STR}/"
 )
 setup_logging()
 logger = logging.getLogger("app")

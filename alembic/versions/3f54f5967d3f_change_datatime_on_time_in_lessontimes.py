@@ -25,6 +25,6 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    op.alter_column('lesson_times', 'start_time', type_=sa.DateTime(), existing_type=sa.Time())
-    op.alter_column('lesson_times', 'end_time', type_=sa.DateTime(), existing_type=sa.Time())
+    op.execute('ALTER TABLE lesson_times ALTER COLUMN start_time TYPE TIME USING start_time::time')
+    op.execute('ALTER TABLE lesson_times ALTER COLUMN end_time TYPE TIME USING end_time::time')
     pass

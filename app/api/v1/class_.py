@@ -400,4 +400,3 @@ async def update_class(class_id: int, class_update: ClassUpdate, db: AsyncSessio
             message="Failed to update class",
             error_code="UPDATE_CLASS_ERROR"
         )
-        

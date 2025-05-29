@@ -1,15 +1,19 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from typing import Union
+from typing import List, Union, Optional
 
 from app.core.dependencies import get_current_user
 from app.db.session import get_db
 
 from app.schemas.base import success_response, error_response, ErrorResponse, BaseResponse
 from app.schemas.responses import TeachersListData, UserWithTeacherInfo, AdminsListData, UsersListData, StudentsListData, UserWithStudentInfo
-from app.schemas.user import User, UserRole, UserDeactivateData, UserResponse
+from app.schemas.user import User, UserRole, UserDeactivateData, UserResponse, UserUpdate
+from app.schemas.student import UserWithStudentInfo as StudentUserWithStudentInfo, UserStudent
+from app.schemas.teacher import UserWithTeacherInfo as TeacherUserWithTeacherInfo, UserTeacher
 
 from app.db.repositories.user import user_repository
+from app.db.repositories.student import student_repository
+from app.db.repositories.teacher import teacher_repository
 import logging
 from app.core.logger import setup_logging
 
@@ -50,21 +54,18 @@ async def get_user_students(
 ):
     """Get all students"""
     try:
-        teacher = None
         if current_user.role == UserRole.TEACHER:
             teacher_id = current_user.id
-            teacher = await user_repository.get_user_teacher(db=db, user_id=current_user.id)
         elif current_user.role != UserRole.ADMIN:
             return error_response(
                 message="You are not allowed to access this resource",
                 error_code="INSUFFICIENT_PERMISSIONS"
             )
         
-        students = await user_repository.get_students(
+        students = await student_repository.get_students(
             db=db, 
-            teacher=teacher,
+            teacher_id=teacher_id,
             class_id=class_id, 
-            teacher_id=teacher_id, 
             search=search, 
             order_by=order_by, 
             order_direction=order_direction, 
@@ -118,7 +119,7 @@ async def get_user_student(
 ):
     """Get user student"""
     try:
-        student = await user_repository.get_user_student(db=db, user_id=user_id)
+        student = await student_repository.get_user_student(db=db, user_id=user_id)
         if not student:
             return error_response(
                 message="User student not found",
@@ -134,13 +135,13 @@ async def get_user_student(
                     error_code="INSUFFICIENT_PERMISSIONS"
                 )
         elif current_user.role == UserRole.TEACHER:
-            teacher = await user_repository.get_user_teacher(db=db, user_id=current_user.id)
+            teacher = await teacher_repository.get_user_teacher(db=db, user_id=current_user.id)
             
             is_class_teacher = teacher.class_id == student.class_id
             
             has_lessons = False
             if student.class_id:
-                has_lessons = await user_repository.is_class_teacher(db=db, user_id=current_user.id, class_id=student.class_id)
+                has_lessons = await teacher_repository.is_class_teacher(db=db, user_id=current_user.id, class_id=student.class_id)
                 
             if not (is_class_teacher or has_lessons):
                 return error_response(
@@ -201,7 +202,7 @@ async def get_user_teachers(
                 error_code="INSUFFICIENT_PERMISSIONS"
             )
         
-        teachers = await user_repository.get_teachers(db=db, search=search, order_by=order_by, order_direction=order_direction, is_active=is_active, class_id=class_id, skip=skip, limit=limit)
+        teachers = await teacher_repository.get_teachers(db=db, search=search, order_by=order_by, order_direction=order_direction, is_active=is_active, class_id=class_id, skip=skip, limit=limit)
         teachers_data = []
         
         for teacher in teachers:
@@ -254,7 +255,7 @@ async def get_user_teacher(
                 error_code="INSUFFICIENT_PERMISSIONS"
             )
         
-        teacher = await user_repository.get_user_teacher(db=db, user_id=user_id)
+        teacher = await teacher_repository.get_user_teacher(db=db, user_id=user_id)
         if not teacher:
             return error_response(
                 message="User teacher not found",

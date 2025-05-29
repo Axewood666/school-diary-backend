@@ -1,6 +1,7 @@
 from typing import List
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.db.repositories.user import user_repository
+from app.db.repositories.student import student_repository
+from app.db.repositories.student_class_history import student_class_history_repository
 from app.schemas.student import UserWithStudentInfo, StudentUpdate
 from app.schemas.class_ import ClassCreate
 from app.db.repositories.class_ import class_repository
@@ -11,13 +12,13 @@ from app.db.models.class_ import StudentClassHistoryReason
 async def add_students_to_class(db: AsyncSession, students: List[int], class_id: int) -> List[UserWithStudentInfo]:
     students_list = []
     for student_id in students:
-        student = await user_repository.get_user_student(db=db, user_id=student_id)
+        student = await student_repository.get_user_student(db=db, user_id=student_id)
         if not student:
             continue
         else:
             if student.class_id != class_id:
-                await user_repository.update(db=db, db_obj=student, obj_in=StudentUpdate(class_id=class_id))
-                await class_repository.write_assign(db=db, student_id=student_id, class_id=class_id, reason=StudentClassHistoryReason.ADMISSION, is_active=True)
+                await student_repository.update(db=db, db_obj=student, obj_in=StudentUpdate(class_id=class_id))
+                await student_class_history_repository.write_assign(db=db, student_id=student_id, class_id=class_id, reason=StudentClassHistoryReason.ADMISSION, is_active=True)
 
                 students_list.append(UserWithStudentInfo.model_validate(student))
             
@@ -26,12 +27,12 @@ async def add_students_to_class(db: AsyncSession, students: List[int], class_id:
 async def remove_students_from_class(db: AsyncSession, students: List[int], class_id: int) -> List[UserWithStudentInfo]:
     removed_students_list = []
     for student_id in students:
-        student = await user_repository.get_user_student(db=db, user_id=student_id)
+        student = await student_repository.get_user_student(db=db, user_id=student_id)
         if not student:
             continue
         if student.class_id == class_id:
-            await user_repository.update(db=db, db_obj=student, obj_in=StudentUpdate(class_id=None))
-            await class_repository.write_assign(db=db, student_id=student_id, class_id=None, reason=StudentClassHistoryReason.TRANSFER, is_active=True)
+            await student_repository.update(db=db, db_obj=student, obj_in=StudentUpdate(class_id=None))
+            await student_class_history_repository.write_assign(db=db, student_id=student_id, class_id=None, reason=StudentClassHistoryReason.TRANSFER, is_active=True)
             
             removed_students_list.append(UserWithStudentInfo.model_validate(student))
     return removed_students_list

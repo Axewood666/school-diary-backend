@@ -34,6 +34,14 @@ class SubjectList(BaseModel):
     class Config:
         from_attributes = True
 
+class TeacherSubjectCreate(BaseModel):
+    subject_id: int
+    teacher_id: int
+
+class TeacherSubjectUpdate(BaseModel):
+    subject_id: Optional[int] = None
+    teacher_id: Optional[int] = None
+
 class TeacherWithSubjects(BaseModel):
     teacher: UserWithTeacherInfo
     subject: Optional[List[SubjectList]] = None

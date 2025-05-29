@@ -6,7 +6,8 @@ from app.schemas.teacher import UserWithTeacherInfo, Teacher
 from app.schemas.user import UserResponse
 
 from app.db.repositories.subject import subject_repository
-from app.db.repositories.user import user_repository
+from app.db.repositories.teacher_subject import teacher_subject_repository
+from app.db.repositories.teacher import teacher_repository
 from app.core.dependencies import get_db, get_current_user
 from app.schemas.user import User, UserRole
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -92,7 +93,7 @@ async def get_subject_teachers(subject_id: int,
                                 skip: int = 0, limit: int = 100,
                                 db: AsyncSession = Depends(get_db), _: User = Depends(get_current_user)):
     try:
-        teacher_subjects = await subject_repository.get_teachers_by_subject(db=db, subject_id=subject_id, skip=skip, limit=limit)
+        teacher_subjects = await teacher_subject_repository.get_teachers_by_subject(db=db, subject_id=subject_id, skip=skip, limit=limit)
         if not teacher_subjects:
             return error_response(message="Subject teachers not found", error_code="SUBJECT_TEACHERS_NOT_FOUND")
         
@@ -132,16 +133,16 @@ async def add_subject_teacher(subject_id: int, teacher_id: int, db: AsyncSession
         if not subject:
             return error_response(message="Subject not found", error_code="SUBJECT_NOT_FOUND")
         
-        teacher = await user_repository.get_user_teacher(db=db, user_id=teacher_id)
+        teacher = await teacher_repository.get_user_teacher(db=db, user_id=teacher_id)
         if not teacher:
             return error_response(message="Teacher not found", error_code="TEACHER_NOT_FOUND")
         
-        if await subject_repository.get_teacher_subject(db=db, subject_id=subject_id, teacher_id=teacher_id):
+        if await teacher_subject_repository.get_teacher_subject(db=db, subject_id=subject_id, teacher_id=teacher_id):
             return error_response(message="Teacher already in subject", error_code="TEACHER_ALREADY_IN_SUBJECT")
         
-        await subject_repository.add_teacher_subject(db=db, subject_id=subject_id, teacher_id=teacher_id)
+        await teacher_subject_repository.add_teacher_subject(db=db, subject_id=subject_id, teacher_id=teacher_id)
         
-        subjects = await subject_repository.get_subjects_by_teacher(db=db, teacher_id=teacher_id)
+        subjects = await teacher_subject_repository.get_subjects_by_teacher(db=db, teacher_id=teacher_id)
         subjects_list = []
         for subject_item in subjects:
             subjects_list.append(SubjectList.model_validate(subject_item))
@@ -160,11 +161,11 @@ async def add_subject_teacher(subject_id: int, teacher_id: int, db: AsyncSession
 @router.get("/{teacher_id}/subjects", response_model=Union[BaseResponse[List[SubjectList]], ErrorResponse])
 async def get_teacher_subjects(teacher_id: int, db: AsyncSession = Depends(get_db), _: User = Depends(get_current_user)):
     try:
-        teacher = await user_repository.get_user_teacher(db=db, user_id=teacher_id)
+        teacher = await teacher_repository.get_user_teacher(db=db, user_id=teacher_id)
         if not teacher:
             return error_response(message="Teacher not found", error_code="TEACHER_NOT_FOUND")
         
-        teacher_subjects = await subject_repository.get_subjects_by_teacher(db=db, teacher_id=teacher_id)
+        teacher_subjects = await teacher_subject_repository.get_subjects_by_teacher(db=db, teacher_id=teacher_id)
         if not teacher_subjects:
             return error_response(message="Teacher subjects not found", error_code="TEACHER_SUBJECTS_NOT_FOUND")
         
@@ -175,3 +176,4 @@ async def get_teacher_subjects(teacher_id: int, db: AsyncSession = Depends(get_d
         return success_response(data=subjects_list, message="Teacher subjects retrieved successfully")
     except Exception as e:
         logger.error(f"GET_TEACHER_SUBJECTS_ERROR: {e}")
+        return error_response(message="Failed to get teacher subjects", error_code="GET_TEACHER_SUBJECTS_ERROR")

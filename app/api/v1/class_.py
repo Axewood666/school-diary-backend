@@ -11,7 +11,9 @@ from app.db.models.user import User
 from app.core.dependencies import get_current_user
 from datetime import datetime
 from app.db.repositories.class_ import class_repository
-from app.db.repositories.user import user_repository
+from app.db.repositories.class_config import class_config_repository
+from app.db.repositories.student import student_repository
+from app.db.repositories.teacher import teacher_repository
 from app.schemas.class_ import ClassList, ClassCreate, ClassCreateDb, ClassUpdate, ClassConfig, ClassUpdateDb, ClassWithStudentsList
 import logging
 from typing import List, Union
@@ -36,7 +38,7 @@ async def update_class_config(class_config: ClassConfig, db: AsyncSession = Depe
                 error_code="INSUFFICIENT_PERMISSIONS"
             )
         
-        class_config = await class_repository.update_class_config(db=db, obj_in=class_config)
+        class_config = await class_config_repository.update_class_config(db=db, obj_in=class_config)
         
         return success_response(
             data=ClassConfig.model_validate(class_config),
@@ -59,7 +61,7 @@ async def get_class_config(db: AsyncSession = Depends(get_db), current_user: Use
                 error_code="INSUFFICIENT_PERMISSIONS"
             )
             
-        class_config = await class_repository.get_class_config(db=db)
+        class_config = await class_config_repository.get_class_config(db=db)
         if not class_config:
             return error_response(
                 message="Class config not found",
@@ -77,6 +79,33 @@ async def get_class_config(db: AsyncSession = Depends(get_db), current_user: Use
             error_code="GET_CLASS_CONFIG_ERROR"
         )
         
+@router.get("/config/free_letters", response_model=Union[BaseResponse[List[str]], ErrorResponse])
+async def get_free_letters_for_grade_level(grade_level: int, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
+    try:
+        if current_user.role != UserRole.ADMIN:
+            return error_response(
+                message="You are not allowed to access this resource",
+                error_code="INSUFFICIENT_PERMISSIONS"
+            )
+            
+        class_config = await class_config_repository.get_free_letters(db=db, grade_level=grade_level)
+        if not class_config:
+            return error_response(
+                message="Class config not found",
+                error_code="CLASS_CONFIG_NOT_FOUND"
+            )
+        
+        return success_response(
+            data=class_config,
+            message="Class config retrieved successfully"
+        )
+    except Exception as e:
+        logger.error(f"GET_FREE_CLASS_CONFIG_ERROR: {e}")
+        return error_response(
+            message="Failed to get free class config",
+            error_code="GET_FREE_CLASS_CONFIG_ERROR"
+        )
+
 @router.patch("/{class_id}/students", response_model=Union[BaseResponse[UpdatedClassStudentsListData], ErrorResponse])
 async def update_class_students(class_id: int, new_students: List[int] = None, remove_students: List[int] = None, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
     try:
@@ -141,7 +170,7 @@ async def get_class_students(class_id: int, db: AsyncSession = Depends(get_db), 
                 error_code="CLASS_NOT_FOUND"
             )
             
-        students = await user_repository.get_students(db=db, class_id=class_id, order_by="full_name", order_direction="asc")        
+        students = await student_repository.get_students(db=db, class_id=class_id, order_by="full_name", order_direction="asc")        
         students_list = []
         for student in students:
             student_data = UserWithStudentInfo(
@@ -170,7 +199,7 @@ async def get_classes(skip: int = 0, limit: int = 100,
                         db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
     try:
         if current_user.role == UserRole.TEACHER:
-            teacher = await user_repository.get_user_teacher(db=db, user_id=current_user.id)
+            teacher = await teacher_repository.get_user_teacher(db=db, user_id=current_user.id)
             classes = await class_repository.get_classes(db=db, teacher=teacher, search=search, order_by=order_by, order_direction=order_direction, year=year, skip=skip, limit=limit)
         elif current_user.role == UserRole.ADMIN:
             classes = await class_repository.get_classes(db=db, search=search, order_by=order_by, order_direction=order_direction, year=year, skip=skip, limit=limit)
@@ -220,7 +249,7 @@ async def create_class(class_create: ClassCreate, db: AsyncSession = Depends(get
                 error_code="INSUFFICIENT_PERMISSIONS"
             )
             
-        class_config = await class_repository.get_class_config(db=db)
+        class_config = await class_config_repository.get_class_config(db=db)
         if not class_config:
             return error_response(
                 message="Class config not found",
@@ -339,7 +368,7 @@ async def update_class(class_id: int, class_update: ClassUpdate, db: AsyncSessio
                 error_code="CLASS_NOT_FOUND"
             )
             
-        class_config = await class_repository.get_class_config(db=db)
+        class_config = await class_config_repository.get_class_config(db=db)
         if not class_config:
             return error_response(
                 message="Class config not found",

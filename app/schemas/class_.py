@@ -65,6 +65,28 @@ class ClassConfig(BaseModel):
             return ValueError("Specializations must be unique")
         
         return v
+
+class ClassConfigCreate(BaseModel):
+    specializations: List[str]
+    grade_levels: List[int]
+    letters: List[str]
+
+class ClassConfigUpdate(BaseModel):
+    specializations: Optional[List[str]] = None
+    grade_levels: Optional[List[int]] = None
+    letters: Optional[List[str]] = None
+
+class StudentClassHistoryCreate(BaseModel):
+    student_id: int
+    class_id: Optional[int] = None
+    reason: str
+    is_active: bool = True
+
+class StudentClassHistoryUpdate(BaseModel):
+    student_id: Optional[int] = None
+    class_id: Optional[int] = None
+    reason: Optional[str] = None
+    is_active: Optional[bool] = None
     
 class ClassWithStudentsList(BaseModel):
     class_info: ClassList

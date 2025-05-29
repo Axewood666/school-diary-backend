@@ -7,6 +7,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.config import settings
 from app.core.security import create_access_token, get_password_hash, verify_password
 from app.db.repositories.user import user_repository
+from app.db.repositories.student import student_repository
+from app.db.repositories.teacher import teacher_repository
 from app.schemas.auth import Token, UserInviteCreate, AcceptInvite
 from app.services.mailer import MailerService
 from datetime import datetime
@@ -16,6 +18,7 @@ from app.schemas.teacher import TeacherInDb
 from app.schemas.user import UserInDB, UserCreate
 from app.db.models.user import UserRole
 from app.db.repositories.user_invites import user_invite_repository
+
 async def get_user_by_id(db: AsyncSession, user_id: int):
     return await user_repository.get(db=db, id=user_id)
 
@@ -143,7 +146,7 @@ async def invite_accept_process(accept_invite: AcceptInvite, db: AsyncSession) -
             "parent_phone": None,
             "parent_email": None,
         }
-        await user_repository.create_student(db=db, student_in=StudentInDb(**student_data))
+        await student_repository.create_student(db=db, student_in=StudentInDb(**student_data))
     elif invite.role == UserRole.TEACHER:
         teacher_data = {
             "user_id": db_user.id,
@@ -152,6 +155,6 @@ async def invite_accept_process(accept_invite: AcceptInvite, db: AsyncSession) -
             "experience": None,
             "bio": None
         }
-        await user_repository.create_teacher(db=db, teacher_in=TeacherInDb(**teacher_data))
+        await teacher_repository.create_teacher(db=db, teacher_in=TeacherInDb(**teacher_data))
     
     return db_user.id

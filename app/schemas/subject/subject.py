@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 from datetime import datetime
 from typing import List, Optional
-from app.schemas.teacher import UserWithTeacherInfo
+from app.schemas.user.teacher import UserWithTeacherInfo
 
 class SubjectCreate(BaseModel):
     name: str

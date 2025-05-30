@@ -5,8 +5,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.base import BaseRepository
 from app.db.models.class_ import ClassTemplate
-from app.schemas.class_ import ClassConfig, ClassConfigCreate, ClassConfigUpdate
-from app.db.repositories.class_ import class_repository
+from app.schemas.class_.class_ import ClassConfig, ClassConfigCreate, ClassConfigUpdate
+from app.db.repositories.class_.class_ import class_repository
 
 class ClassConfigRepository(BaseRepository[ClassTemplate, ClassConfigCreate, ClassConfigUpdate]):
     async def update_class_config(self, db: AsyncSession, obj_in: ClassConfig) -> ClassTemplate:

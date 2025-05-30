@@ -10,7 +10,7 @@ from app.db.models.class_ import Class
 from app.db.models.academic_cycles import AcademicYear
 from app.db.models.schedule import Schedule
 from app.db.models.user import Teacher, Student
-from app.schemas.class_ import ClassCreate, ClassUpdate
+from app.schemas.class_.class_ import ClassCreate, ClassUpdate
 
 
 class ClassRepository(BaseRepository[Class, ClassCreate, ClassUpdate]):

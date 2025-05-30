@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.base import BaseRepository
 from app.db.models.file import File
-from app.schemas.file import FileCreate, FileUpdate
+from app.schemas.file.file import FileCreate, FileUpdate
 
 
 class FileRepository(BaseRepository[File, FileCreate, FileUpdate]):

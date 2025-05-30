@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.base import BaseRepository
 from app.db.models.class_ import StudentClassHistory, StudentClassHistoryReason
-from app.schemas.class_ import StudentClassHistoryCreate, StudentClassHistoryUpdate
+from app.schemas.class_.class_ import StudentClassHistoryCreate, StudentClassHistoryUpdate
 
 
 class StudentClassHistoryRepository(BaseRepository[StudentClassHistory, StudentClassHistoryCreate, StudentClassHistoryUpdate]):

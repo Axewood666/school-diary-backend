@@ -7,7 +7,7 @@ from sqlalchemy.orm import joinedload
 from app.db.base import BaseRepository
 from app.db.models.subject import Subject, TeacherSubject
 from app.db.models.user import Teacher
-from app.schemas.subject import TeacherSubjectCreate, TeacherSubjectUpdate
+from app.schemas.subject.subject import TeacherSubjectCreate, TeacherSubjectUpdate
 
 
 class TeacherSubjectRepository(BaseRepository[TeacherSubject, TeacherSubjectCreate, TeacherSubjectUpdate]):

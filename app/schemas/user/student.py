@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from typing import Optional
-from app.schemas.user import UserBase, UserResponse
+from app.schemas.user.user import UserBase, UserResponse
 
 class StudentBase(BaseModel):
     class_id: Optional[int] = None

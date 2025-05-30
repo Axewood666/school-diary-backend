@@ -8,7 +8,7 @@ from .base import (
     error_response
 )
 
-from .user import (
+from .user.user import (
     UserBase,
     UserResponse,
     UserCreate,
@@ -18,7 +18,7 @@ from .user import (
     UserDeactivateData
 )
 
-from .student import (
+from .user.student import (
     StudentBase,
     Student,
     StudentInDb,
@@ -28,7 +28,7 @@ from .student import (
     UserStudent
 )
 
-from .teacher import (
+from .user.teacher import (
     TeacherBase,
     Teacher,
     TeacherInDb,
@@ -38,7 +38,7 @@ from .teacher import (
     UserTeacher
 )
 
-from .auth import (
+from .auth.auth import (
     Token,
     TokenData,
     LoginRequest,
@@ -50,7 +50,7 @@ from .auth import (
     InviteValidationData
 )
 
-from .file import (
+from .file.file import (
     FileBase,
     FileCreate,
     FileUpdate,

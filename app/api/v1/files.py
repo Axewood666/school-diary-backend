@@ -6,12 +6,12 @@ from app.core.config import settings
 from app.db.session import get_db
 
 from app.db.models.user import UserRole
-from app.db.repositories.file import file_repository
-from app.schemas.file import File, FileCreate
+from app.db.repositories.file.file import file_repository
+from app.schemas.file.file import File, FileCreate
 from app.schemas.base import success_response, error_response
 from app.services.minio import MinioService, get_minio_service
 from app.core.dependencies import get_current_user
-from app.schemas.user import User
+from app.schemas.user.user import User
 import logging
 from app.core.logger import setup_logging
 

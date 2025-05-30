@@ -1,15 +1,15 @@
 from fastapi import APIRouter
 
-from app.schemas.subject import SubjectList, SubjectCreate, SubjectUpdate, TeacherWithSubjects
+from app.schemas.subject.subject import SubjectList, SubjectCreate, SubjectUpdate, TeacherWithSubjects
 from app.schemas.base import BaseResponse, ErrorResponse, success_response, error_response
-from app.schemas.teacher import UserWithTeacherInfo, Teacher
-from app.schemas.user import UserResponse
+from app.schemas.user.teacher import UserWithTeacherInfo, Teacher
+from app.schemas.user.user import UserResponse
 
-from app.db.repositories.subject import subject_repository
-from app.db.repositories.teacher_subject import teacher_subject_repository
-from app.db.repositories.teacher import teacher_repository
+from app.db.repositories.subject.subject import subject_repository
+from app.db.repositories.subject.teacher_subject import teacher_subject_repository
+from app.db.repositories.user.teacher import teacher_repository
 from app.core.dependencies import get_db, get_current_user
-from app.schemas.user import User, UserRole
+from app.schemas.user.user import User, UserRole
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List, Union
 from fastapi import Depends
@@ -123,7 +123,7 @@ async def get_subject(subject_id: int, db: AsyncSession = Depends(get_db), _: Us
         return error_response(message="Failed to get subject", error_code="GET_SUBJECT_ERROR")
     
 @router.post("/{subject_id}/teachers", response_model=Union[BaseResponse[TeacherWithSubjects], ErrorResponse])
-async def add_subject_teacher(subject_id: int, teacher_id: int, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
+async def assign_subject_to_teacher(subject_id: int, teacher_id: int, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
     try:
         if current_user.role != UserRole.ADMIN:
             return error_response(message="You are not allowed to access this resource",

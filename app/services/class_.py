@@ -1,12 +1,12 @@
 from typing import List
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.db.repositories.student import student_repository
-from app.db.repositories.student_class_history import student_class_history_repository
-from app.schemas.student import UserWithStudentInfo, StudentUpdate
-from app.schemas.class_ import ClassCreate
-from app.db.repositories.class_ import class_repository
-from app.db.repositories.academic_cycles import academic_cycles_repository
-from app.schemas.class_ import ClassConfig
+from app.db.repositories.user.student import student_repository
+from app.db.repositories.class_.student_class_history import student_class_history_repository
+from app.schemas.user.student import UserWithStudentInfo, StudentUpdate
+from app.schemas.class_.class_ import ClassCreate
+from app.db.repositories.class_.class_ import class_repository
+from app.db.repositories.academic_cycles.academic_years import academic_years_repository
+from app.schemas.class_.class_ import ClassConfig
 from app.db.models.class_ import StudentClassHistoryReason
 
 async def add_students_to_class(db: AsyncSession, students: List[int], class_id: int) -> List[UserWithStudentInfo]:
@@ -45,7 +45,7 @@ async def check_class_config(db: AsyncSession, class_create: ClassCreate, class_
         if class_create.specialization not in class_config.specializations:
             raise ValueError("Invalid specialization")
         if not class_year_id:
-            year = await academic_cycles_repository.get_current_academic_year(db=db)
+            year = await academic_years_repository.get_current_academic_year(db=db)
             if not year:
                 raise ValueError("Year not found")
             class_year_id = year.id

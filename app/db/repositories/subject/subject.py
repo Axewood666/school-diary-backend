@@ -4,7 +4,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models.subject import Subject
-from app.schemas.subject import SubjectCreate, SubjectUpdate, SubjectList
+from app.schemas.subject.subject import SubjectCreate, SubjectUpdate, SubjectList
 from app.db.base import BaseRepository
 
 

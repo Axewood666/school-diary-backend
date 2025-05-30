@@ -7,7 +7,7 @@ from sqlalchemy.orm import selectinload
 from app.db.base import BaseRepository
 from app.db.models.user import User, Teacher
 from app.db.models.schedule import Schedule
-from app.schemas.teacher import TeacherInDb, UserTeacher, TeacherUpdate
+from app.schemas.user.teacher import TeacherInDb, UserTeacher, TeacherUpdate
 
 
 class TeacherRepository(BaseRepository[Teacher, TeacherInDb, TeacherUpdate]):

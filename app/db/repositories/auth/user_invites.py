@@ -1,4 +1,4 @@
-from app.schemas.auth import UserInviteCreate, UserInviteUpdate
+from app.schemas.auth.auth import UserInviteCreate, UserInviteUpdate
 from app.db.models.user import UserInvite
 from app.db.base import BaseRepository
 from sqlalchemy import select, update

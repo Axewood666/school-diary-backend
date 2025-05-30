@@ -1,7 +1,7 @@
 from pydantic import BaseModel, field_validator
 from datetime import datetime
-from app.schemas.teacher import UserWithTeacherInfo
-from app.schemas.student import UserWithStudentInfo
+from app.schemas.user.teacher import UserWithTeacherInfo
+from app.schemas.user.student import UserWithStudentInfo
 from typing import Optional, List
 
 class ClassCreate(BaseModel):

@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.models.user import UserRole
 from app.db.base import BaseRepository
 from app.db.models.user import User
-from app.schemas.user import UserCreate, UserUpdate
+from app.schemas.user.user import UserCreate, UserUpdate
 
 
 class UserRepository(BaseRepository[User, UserCreate, UserUpdate]):

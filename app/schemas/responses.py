@@ -1,9 +1,9 @@
 from typing import List
 from app.schemas.base import PaginatedResponse
-from app.schemas.auth import Token, UserInviteInfo
-from app.schemas.user import User
-from app.schemas.student import UserWithStudentInfo
-from app.schemas.teacher import UserWithTeacherInfo
+from app.schemas.auth.auth import Token, UserInviteInfo
+from app.schemas.user.user import User
+from app.schemas.user.student import UserWithStudentInfo
+from app.schemas.user.teacher import UserWithTeacherInfo
 from pydantic import BaseModel
 
 class LoginSuccessResponse(Token):

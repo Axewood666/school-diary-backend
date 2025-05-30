@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.schemas.base import error_response, BaseResponse, ErrorResponse, success_response
-from app.schemas.user import UserRole, User
+from app.schemas.user.user import UserRole, User
 from app.schemas.responses import UpdatedClassStudentsListData
 
 from app.core.dependencies import get_db
@@ -10,18 +10,18 @@ from app.core.logger import setup_logging
 from app.db.models.user import User
 from app.core.dependencies import get_current_user
 from datetime import datetime
-from app.db.repositories.class_ import class_repository
-from app.db.repositories.class_config import class_config_repository
-from app.db.repositories.student import student_repository
-from app.db.repositories.teacher import teacher_repository
-from app.schemas.class_ import ClassList, ClassCreate, ClassCreateDb, ClassUpdate, ClassConfig, ClassUpdateDb, ClassWithStudentsList
+from app.db.repositories.class_.class_ import class_repository
+from app.db.repositories.class_.class_config import class_config_repository
+from app.db.repositories.user.student import student_repository
+from app.db.repositories.user.teacher import teacher_repository
+from app.schemas.class_.class_ import ClassList, ClassCreate, ClassCreateDb, ClassUpdate, ClassConfig, ClassUpdateDb, ClassWithStudentsList
 import logging
 from typing import List, Union
-from app.db.repositories.academic_cycles import academic_cycles_repository
+from app.db.repositories.academic_cycles.academic_years import academic_years_repository
 from app.services.class_ import add_students_to_class, remove_students_from_class, check_class_config
-from app.schemas.teacher import UserWithTeacherInfo, Teacher
-from app.schemas.student import UserWithStudentInfo, Student
-from app.schemas.user import UserResponse
+from app.schemas.user.teacher import UserWithTeacherInfo, Teacher
+from app.schemas.user.student import UserWithStudentInfo, Student
+from app.schemas.user.user import UserResponse
 
 setup_logging()
 logger = logging.getLogger("app")
@@ -261,7 +261,7 @@ async def create_class(class_create: ClassCreate, db: AsyncSession = Depends(get
                 error_code="INVALID_CLASS_CONFIG"
             )
         
-        year = await academic_cycles_repository.get_current_academic_year(db=db)
+        year = await academic_years_repository.get_current_academic_year(db=db)
         if not year:
             return error_response(
                 message="Current academic year not found",

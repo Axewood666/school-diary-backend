@@ -6,12 +6,12 @@ from app.core.dependencies import get_current_user
 from app.db.session import get_db
 
 from app.schemas.base import success_response, error_response, ErrorResponse, BaseResponse
-from app.schemas.auth import UserInviteCreate, AcceptInvite, UserInviteInfo, InviteValidationData, Token
+from app.schemas.auth.auth import UserInviteCreate, AcceptInvite, UserInviteInfo, InviteValidationData, Token
 from app.schemas.responses import LoginSuccessResponse, InviteListData
 
 from app.services.auth import authenticate_user, create_user_token, create_user_invite, invite_accept_process
 from app.services.mailer import get_mailer_service, MailerService
-from app.db.repositories.user_invites import user_invite_repository
+from app.db.repositories.auth.user_invites import user_invite_repository
 from app.db.models.user import User, UserRole
 
 from typing import Union

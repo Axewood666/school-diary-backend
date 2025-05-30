@@ -1,19 +1,18 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
-from typing import List, Union, Optional
+from typing import Union
 
 from app.core.dependencies import get_current_user
 from app.db.session import get_db
 
 from app.schemas.base import success_response, error_response, ErrorResponse, BaseResponse
 from app.schemas.responses import TeachersListData, UserWithTeacherInfo, AdminsListData, UsersListData, StudentsListData, UserWithStudentInfo
-from app.schemas.user import User, UserRole, UserDeactivateData, UserResponse, UserUpdate
-from app.schemas.student import UserWithStudentInfo as StudentUserWithStudentInfo, UserStudent
-from app.schemas.teacher import UserWithTeacherInfo as TeacherUserWithTeacherInfo, UserTeacher
+from app.schemas.user.user import User, UserRole, UserDeactivateData, UserResponse
 
-from app.db.repositories.user import user_repository
-from app.db.repositories.student import student_repository
-from app.db.repositories.teacher import teacher_repository
+
+from app.db.repositories.user.user import user_repository
+from app.db.repositories.user.student import student_repository
+from app.db.repositories.user.teacher import teacher_repository
 import logging
 from app.core.logger import setup_logging
 

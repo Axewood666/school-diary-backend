@@ -51,7 +51,11 @@ async def get_user_students(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
-    """Get all students"""
+    """
+    Получение списка студентов с фильтрацией и пагинацией.
+    
+    (Сгенерировано автоматически(C4S))@v1
+    """
     try:
         if current_user.role == UserRole.TEACHER:
             teacher_id = current_user.id
@@ -116,7 +120,11 @@ async def get_user_student(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
-    """Get user student"""
+    """
+    Получение информации о конкретном студенте.
+    
+    (Сгенерировано автоматически(C4S))@v1
+    """
     try:
         student = await student_repository.get_user_student(db=db, user_id=user_id)
         if not student:
@@ -193,7 +201,11 @@ async def get_user_teachers(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
-    """Get all teachers"""
+    """
+    Получение списка учителей с фильтрацией и пагинацией.
+    
+    (Сгенерировано автоматически(C4S))@v1
+    """
     try:
         if current_user.role != UserRole.ADMIN:
             return error_response(
@@ -201,9 +213,18 @@ async def get_user_teachers(
                 error_code="INSUFFICIENT_PERMISSIONS"
             )
         
-        teachers = await teacher_repository.get_teachers(db=db, search=search, order_by=order_by, order_direction=order_direction, is_active=is_active, class_id=class_id, skip=skip, limit=limit)
-        teachers_data = []
+        teachers = await teacher_repository.get_teachers(
+            db=db, 
+            search=search, 
+            order_by=order_by, 
+            order_direction=order_direction, 
+            is_active=is_active,
+            class_id=class_id,
+            skip=skip,
+            limit=limit
+        )
         
+        teachers_data = []
         for teacher in teachers:
             teachers_data.append({
                 "user_info": {
@@ -246,19 +267,31 @@ async def get_user_teacher(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
-    """Get user teacher"""
+    """
+    Получение информации о конкретном учителе.
+    
+    (Сгенерировано автоматически(C4S))@v1
+    """
     try:
-        if current_user.role != UserRole.ADMIN:
-            return error_response(
-                message="You are not allowed to access this resource",
-                error_code="INSUFFICIENT_PERMISSIONS"
-            )
-        
         teacher = await teacher_repository.get_user_teacher(db=db, user_id=user_id)
         if not teacher:
             return error_response(
                 message="User teacher not found",
                 error_code="TEACHER_NOT_FOUND"
+            )
+
+        if current_user.role == UserRole.ADMIN:
+            pass
+        elif current_user.role == UserRole.TEACHER:
+            if current_user.id != user_id:
+                return error_response(
+                    message="You are not allowed to access this resource",
+                    error_code="INSUFFICIENT_PERMISSIONS"
+                )
+        else:
+            return error_response(
+                message="You are not allowed to access this resource",
+                error_code="INSUFFICIENT_PERMISSIONS"
             )
         
         teacher_data = {
@@ -300,7 +333,11 @@ async def get_user_admins(
     order_direction: str = "desc",
     is_active: bool = None
 ):
-    """Get all admins"""
+    """
+    Получение списка администраторов с фильтрацией и пагинацией.
+    
+    (Сгенерировано автоматически(C4S))@v1
+    """
     try:
         if current_user.role != UserRole.ADMIN:
             return error_response(
@@ -308,11 +345,31 @@ async def get_user_admins(
                 error_code="INSUFFICIENT_PERMISSIONS"
             )
         
-        admins = await user_repository.get_users(role=UserRole.ADMIN, db=db, search=search, order_by=order_by, order_direction=order_direction, is_active=is_active, skip=skip, limit=limit)
+        admins = await user_repository.get_users(
+            db=db, 
+            skip=skip, 
+            limit=limit, 
+            search=search, 
+            order_by=order_by, 
+            order_direction=order_direction, 
+            is_active=is_active, 
+            role=UserRole.ADMIN
+        )
+        
+        admins_data = []
+        for admin in admins:
+            admins_data.append({
+                "id": admin.id,
+                "email": admin.email,
+                "username": admin.username,
+                "full_name": admin.full_name,
+                "is_active": admin.is_active,
+                "role": admin.role
+            })
         
         return success_response(
             data={
-                "items": admins[skip:skip+limit],
+                "items": admins_data,
                 "pagination": {
                     "skip": skip,
                     "limit": limit,
@@ -327,14 +384,18 @@ async def get_user_admins(
             message="Failed to retrieve admins",
             error_code="GET_ADMINS_ERROR"
         )
-        
+
 @router.get("/admins/{user_id}", response_model=Union[BaseResponse[UserResponse], ErrorResponse])
 async def get_user_admin(
     user_id: int,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
-    """Get user admin"""
+    """
+    Получение информации о конкретном администраторе.
+    
+    (Сгенерировано автоматически(C4S))@v1
+    """
     try:
         if current_user.role != UserRole.ADMIN:
             return error_response(
@@ -349,8 +410,17 @@ async def get_user_admin(
                 error_code="ADMIN_NOT_FOUND"
             )
         
+        admin_data = {
+            "id": admin.id,
+            "email": admin.email,
+            "username": admin.username,
+            "full_name": admin.full_name,
+            "is_active": admin.is_active,
+            "role": admin.role
+        }
+        
         return success_response(
-            data=admin,
+            data=admin_data,
             message="Admin retrieved successfully"
         )
     except Exception as e:
@@ -372,7 +442,11 @@ async def get_users(
     is_active: bool = None,
     role: UserRole = None
 ):
-    """Get all users"""
+    """
+    Получение списка всех пользователей с фильтрацией и пагинацией.
+    
+    (Сгенерировано автоматически(C4S))@v1
+    """
     try:
         if current_user.role != UserRole.ADMIN:
             return error_response(
@@ -380,11 +454,31 @@ async def get_users(
                 error_code="INSUFFICIENT_PERMISSIONS"
             )
         
-        users = await user_repository.get_users(db=db, search=search, order_by=order_by, order_direction=order_direction, is_active=is_active, role=role, skip=skip, limit=limit)
+        users = await user_repository.get_users(
+            db=db, 
+            skip=skip, 
+            limit=limit, 
+            search=search, 
+            order_by=order_by, 
+            order_direction=order_direction, 
+            is_active=is_active, 
+            role=role
+        )
+        
+        users_data = []
+        for user in users:
+            users_data.append({
+                "id": user.id,
+                "email": user.email,
+                "username": user.username,
+                "full_name": user.full_name,
+                "is_active": user.is_active,
+                "role": user.role
+            })
         
         return success_response(
             data={
-                "items": users[skip:skip+limit],
+                "items": users_data,
                 "pagination": {
                     "skip": skip,
                     "limit": limit,
@@ -406,7 +500,11 @@ async def get_user(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
-    """Get user information"""
+    """
+    Получение информации о конкретном пользователе.
+    
+    (Сгенерировано автоматически(C4S))@v1
+    """
     try:
         if current_user.role != UserRole.ADMIN:
             return error_response(
@@ -431,14 +529,18 @@ async def get_user(
             message="Failed to retrieve user",
             error_code="GET_USER_ERROR"
         )
-            
+
 @router.patch("/{user_id}", response_model=Union[BaseResponse[UserDeactivateData], ErrorResponse])
 async def deactivate_user(
     user_id: int,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
-    """Deactivate user"""
+    """
+    Деактивация пользователя в системе.
+    
+    (Сгенерировано автоматически(C4S))@v1
+    """
     try:
         if current_user.role != UserRole.ADMIN:
             return error_response(
@@ -446,28 +548,25 @@ async def deactivate_user(
                 error_code="INSUFFICIENT_PERMISSIONS"
             )
         
-        user = await user_repository.get(db=db, id=user_id)
+        user = await user_repository.deactivate_user(db=db, user_id=user_id)
         if not user:
-            return error_response(
-                message="User not found",
-                error_code="USER_NOT_FOUND"
-            )
-        if not user.is_active:
-            return error_response(
-                message="User is already deactivate",
-                error_code="USER_ALREADY_DEACTIVATE"
-            )
-        
-        is_deactivated = await user_repository.deactivate_user(db=db, user_id=user_id)
-        if not is_deactivated:
             return error_response(
                 message="User not found",
                 error_code="USER_NOT_FOUND"
             )
         
         return success_response(
-            data={"is_deactivated": True},
+            data=UserDeactivateData(
+                id=user.id,
+                is_active=user.is_active
+            ),
             message="User deactivated successfully"
+        )
+    except ValueError as e:
+        logger.error(f"VALIDATION_ERROR: {e}")
+        return error_response(
+            message=str(e),
+            error_code="VALIDATION_ERROR"
         )
     except Exception as e:
         logger.error(f"DEACTIVATE_USER_ERROR: {e}")

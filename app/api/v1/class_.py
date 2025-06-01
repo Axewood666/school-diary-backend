@@ -31,6 +31,11 @@ router = APIRouter(tags=["class"])
 
 @router.put("/config", response_model=Union[BaseResponse[ClassConfig], ErrorResponse])
 async def update_class_config(class_config: ClassConfig, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
+    """
+    Обновление конфигурации классов (уровни, буквы, специализации).
+    
+    (Сгенерировано автоматически(C4S))@v1
+    """
     try:
         if current_user.role != UserRole.ADMIN:
             return error_response(
@@ -44,7 +49,12 @@ async def update_class_config(class_config: ClassConfig, db: AsyncSession = Depe
             data=ClassConfig.model_validate(class_config),
             message="Class config updated successfully"
         )
-        
+    except ValueError as e:
+        logger.error(f"VALIDATION_ERROR: {e}")
+        return error_response(
+            message=str(e),
+            error_code="VALIDATION_ERROR"
+        )        
     except Exception as e:
         logger.error(f"UPDATE_CLASS_CONFIG_ERROR: {e}")
         return error_response(
@@ -54,6 +64,11 @@ async def update_class_config(class_config: ClassConfig, db: AsyncSession = Depe
         
 @router.get("/config", response_model=Union[BaseResponse[ClassConfig], ErrorResponse])
 async def get_class_config(db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
+    """
+    Получение текущей конфигурации классов.
+    
+    (Сгенерировано автоматически(C4S))@v1
+    """
     try:
         if current_user.role != UserRole.ADMIN:
             return error_response(
@@ -81,6 +96,11 @@ async def get_class_config(db: AsyncSession = Depends(get_db), current_user: Use
         
 @router.get("/config/free_letters", response_model=Union[BaseResponse[List[str]], ErrorResponse])
 async def get_free_letters_for_grade_level(grade_level: int, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
+    """
+    Получение доступных букв классов для указанного уровня (класса).
+    
+    (Сгенерировано автоматически(C4S))@v1
+    """
     try:
         if current_user.role != UserRole.ADMIN:
             return error_response(
@@ -108,6 +128,11 @@ async def get_free_letters_for_grade_level(grade_level: int, db: AsyncSession = 
 
 @router.patch("/{class_id}/students", response_model=Union[BaseResponse[UpdatedClassStudentsListData], ErrorResponse])
 async def update_class_students(class_id: int, new_students: List[int] = None, remove_students: List[int] = None, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
+    """
+    Добавление и удаление студентов из класса.
+    
+    (Сгенерировано автоматически(C4S))@v1
+    """
     try:
         if current_user.role != UserRole.ADMIN:
             return error_response(
@@ -147,6 +172,12 @@ async def update_class_students(class_id: int, new_students: List[int] = None, r
             ),
             message="Class students updated successfully"
         )
+    except ValueError as e:
+        logger.error(f"VALIDATION_ERROR: {e}")
+        return error_response(
+            message=str(e),
+            error_code="VALIDATION_ERROR"
+        )
     except Exception as e:
         logger.error(f"ADD_STUDENTS_TO_CLASS_ERROR: {e}")
         return error_response(
@@ -156,6 +187,11 @@ async def update_class_students(class_id: int, new_students: List[int] = None, r
         
 @router.get("/{class_id}/students", response_model=Union[BaseResponse[List[UserWithStudentInfo]], ErrorResponse])
 async def get_class_students(class_id: int, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
+    """
+    Получение списка студентов конкретного класса.
+    
+    (Сгенерировано автоматически(C4S))@v1
+    """
     try:
         if current_user.role != UserRole.ADMIN:
             return error_response(
@@ -197,6 +233,11 @@ async def get_classes(skip: int = 0, limit: int = 100,
                         order_direction: str = "desc", 
                         year: int = datetime.now().year, 
                         db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
+    """
+    Получение списка классов с фильтрацией и пагинацией.
+    
+    (Сгенерировано автоматически(C4S))@v1
+    """
     try:
         if current_user.role == UserRole.TEACHER:
             teacher = await teacher_repository.get_user_teacher(db=db, user_id=current_user.id)
@@ -242,6 +283,11 @@ async def get_classes(skip: int = 0, limit: int = 100,
 
 @router.post("/", response_model=Union[BaseResponse[ClassList], ErrorResponse])
 async def create_class(class_create: ClassCreate, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
+    """
+    Создание нового класса с проверкой конфигурации.
+    
+    (Сгенерировано автоматически(C4S))@v1
+    """
     try:
         if current_user.role != UserRole.ADMIN:
             return error_response(
@@ -289,7 +335,12 @@ async def create_class(class_create: ClassCreate, db: AsyncSession = Depends(get
             ),
             message="Class created successfully"
         )
-        
+    except ValueError as e:
+        logger.error(f"VALIDATION_ERROR: {e}")
+        return error_response(
+            message=str(e),
+            error_code="VALIDATION_ERROR"
+        )        
     except Exception as e:
         logger.error(f"CREATE_CLASS_ERROR: {e}")
         return error_response(
@@ -299,8 +350,13 @@ async def create_class(class_create: ClassCreate, db: AsyncSession = Depends(get
 
 @router.get("/{class_id}", response_model=Union[BaseResponse[ClassWithStudentsList], ErrorResponse])
 async def get_class_with_students(class_id: int, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
+    """
+    Получение детальной информации о классе со списком студентов.
+    
+    (Сгенерировано автоматически(C4S))@v1
+    """
     try:
-        if current_user.role != UserRole.ADMIN:
+        if current_user.role not in [UserRole.ADMIN, UserRole.TEACHER]:
             return error_response(
                 message="You are not allowed to access this resource",
                 error_code="INSUFFICIENT_PERMISSIONS"
@@ -313,36 +369,32 @@ async def get_class_with_students(class_id: int, db: AsyncSession = Depends(get_
                 error_code="CLASS_NOT_FOUND"
             )
         
-        students_list = []
         teacher_data = None
-        
-        if class_.students:
-            for student in class_.students:
-                students_list.append(UserWithStudentInfo(
-                    user_info=UserResponse.model_validate(student.user),
-                    student_info=Student.model_validate(student)
-                ))
-        
-        if class_.teacher:
+        if class_.teacher and class_.teacher.user:
             teacher_data = UserWithTeacherInfo(
                 user_info=UserResponse.model_validate(class_.teacher.user),
                 teacher_info=Teacher.model_validate(class_.teacher)
             )
         
+        students_list = []
+        for student in class_.students:
+            if student.user:
+                student_data = UserWithStudentInfo(
+                    user_info=UserResponse.model_validate(student.user),
+                    student_info=Student.model_validate(student)
+                )
+                students_list.append(student_data)
+        
         return success_response(
-                data=ClassWithStudentsList(
-                    class_info=ClassList(
-                        id=class_.id,
-                        name=class_.name,
-                        year_id=class_.year_id,
-                        year_name=class_.year.name,
-                        created_at=class_.created_at,
-                        students_count=len(students_list) if students_list else 0,
-                        specialization=class_.specialization
-                    ),
-                    students=students_list,
-                    teacher=teacher_data
-                ),
+            data=ClassWithStudentsList(
+                id=class_.id,
+                name=class_.name,
+                year_id=class_.year_id,
+                year_name=class_.year.name,
+                created_at=class_.created_at,
+                teacher=teacher_data,
+                students=students_list
+            ),
             message="Class retrieved successfully"
         )
     except Exception as e:
@@ -354,6 +406,11 @@ async def get_class_with_students(class_id: int, db: AsyncSession = Depends(get_
         
 @router.put("/{class_id}", response_model=Union[BaseResponse[ClassWithStudentsList], ErrorResponse])
 async def update_class(class_id: int, class_update: ClassUpdate, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
+    """
+    Обновление информации о классе.
+    
+    (Сгенерировано автоматически(C4S))@v1
+    """
     try:
         if current_user.role != UserRole.ADMIN:
             return error_response(
@@ -367,60 +424,56 @@ async def update_class(class_id: int, class_update: ClassUpdate, db: AsyncSessio
                 message="Class not found",
                 error_code="CLASS_NOT_FOUND"
             )
-            
-        class_config = await class_config_repository.get_class_config(db=db)
-        if not class_config:
-            return error_response(
-                message="Class config not found",
-                error_code="CLASS_CONFIG_NOT_FOUND"
-            )
-
-        if not await check_class_config(db=db, class_create=class_update, class_config=class_config, class_id=class_id, class_year_id=class_.year_id):
-            return error_response(
-                message="Invalid class config",
-                error_code="INVALID_CLASS_CONFIG"
-            )
-
+        
+        if class_update.teacher_id:
+            teacher = await teacher_repository.get_user_teacher(db=db, user_id=class_update.teacher_id)
+            if not teacher:
+                return error_response(
+                    message="Teacher not found",
+                    error_code="TEACHER_NOT_FOUND"
+                )
+        
         class_update_db = ClassUpdateDb(
-            grade_level=class_update.grade_level,
             letter=class_update.letter,
             specialization=class_update.specialization,
-            name=f"{class_update.grade_level}{class_update.letter}"
-        )   
-        class_ = await class_repository.update(db=db, db_obj=class_, obj_in=class_update_db)
+            name=f"{class_.grade_level}{class_update.letter}"
+        )
         
-        class_ = await class_repository.get_with_relations(db=db, id=class_id)
+        updated_class = await class_repository.update(db=db, db_obj=class_, obj_in=class_update_db)
+        
+        if class_update.teacher_id:
+            teacher = await teacher_repository.get_user_teacher(db=db, user_id=class_update.teacher_id)
+            teacher.class_id = updated_class.id
+            await teacher_repository.update(db=db, db_obj=teacher, obj_in={"class_id": updated_class.id})
+        
+        updated_class = await class_repository.get_with_relations(db=db, id=class_id)
         
         teacher_data = None
-        students_list = []
+        if updated_class.teacher and updated_class.teacher.user:
+            teacher_data = UserWithTeacherInfo(
+                user_info=UserResponse.model_validate(updated_class.teacher.user),
+                teacher_info=Teacher.model_validate(updated_class.teacher)
+            )
         
-        if class_.students:
-            for student in class_.students:
-                students_list.append(UserWithStudentInfo(
+        students_list = []
+        for student in updated_class.students:
+            if student.user:
+                student_data = UserWithStudentInfo(
                     user_info=UserResponse.model_validate(student.user),
                     student_info=Student.model_validate(student)
-                ))
-        
-        if class_.teacher:
-            teacher_data = UserWithTeacherInfo(
-                user_info=UserResponse.model_validate(class_.teacher.user),
-                teacher_info=Teacher.model_validate(class_.teacher)
-            )
+                )
+                students_list.append(student_data)
         
         return success_response(
             data=ClassWithStudentsList(
-                    class_info=ClassList(
-                        id=class_.id,
-                        name=class_.name,
-                        year_id=class_.year_id,
-                        year_name=class_.year.name,
-                        created_at=class_.created_at,
-                        students_count=len(students_list) if students_list else 0,
-                        specialization=class_.specialization
-                    ),
-                    students=students_list,
-                    teacher=teacher_data
-                ),
+                id=updated_class.id,
+                name=updated_class.name,
+                year_id=updated_class.year_id,
+                year_name=updated_class.year.name,
+                created_at=updated_class.created_at,
+                teacher=teacher_data,
+                students=students_list
+            ),
             message="Class updated successfully"
         )
     except Exception as e:

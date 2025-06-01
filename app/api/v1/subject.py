@@ -28,6 +28,11 @@ async def get_subjects(skip: int = 0, limit: int = 100,
                         order_by: str = "created_at", order_direction: str = "desc", 
                         is_active: bool = True,
                         db: AsyncSession = Depends(get_db), _: User = Depends(get_current_user)):
+    """
+    Получение списка предметов с фильтрацией и пагинацией.
+    
+    (Сгенерировано автоматически(C4S))@v1
+    """
     try:
         subjects = await subject_repository.get_all(db=db, skip=skip, limit=limit, search=search, order_by=order_by, order_direction=order_direction, is_active=is_active)
         return success_response(data=subjects, message="Subjects retrieved successfully")
@@ -37,6 +42,11 @@ async def get_subjects(skip: int = 0, limit: int = 100,
     
 @router.post("/", response_model=Union[BaseResponse[SubjectList], ErrorResponse])
 async def create_subject(subject: SubjectCreate, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
+    """
+    Создание нового предмета.
+    
+    (Сгенерировано автоматически(C4S))@v1
+    """
     try:
         if current_user.role != UserRole.ADMIN:
             return error_response(
@@ -47,12 +57,23 @@ async def create_subject(subject: SubjectCreate, db: AsyncSession = Depends(get_
         subject = await subject_repository.create(db=db, subject=subject)
         
         return success_response(data=subject, message="Subject created successfully")
+    except ValueError as e:
+        logger.error(f"VALIDATION_ERROR: {e}")
+        return error_response(
+            message=str(e),
+            error_code="VALIDATION_ERROR"
+        )
     except Exception as e:
         logger.error(f"CREATE_SUBJECT_ERROR: {e}")
         return error_response(message="Failed to create subject", error_code="CREATE_SUBJECT_ERROR")
 
 @router.patch("/{subject_id}", response_model=Union[BaseResponse[SubjectList], ErrorResponse])
 async def update_subject(subject_id: int, subject: SubjectUpdate, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
+    """
+    Обновление информации о предмете.
+    
+    (Сгенерировано автоматически(C4S))@v1
+    """
     try:
         if current_user.role != UserRole.ADMIN:
             return error_response(
@@ -66,12 +87,23 @@ async def update_subject(subject_id: int, subject: SubjectUpdate, db: AsyncSessi
         
         subject = await subject_repository.update(db=db, db_obj=subject_db, obj_in=subject)
         return success_response(data=subject, message="Subject updated successfully")
+    except ValueError as e:
+        logger.error(f"VALIDATION_ERROR: {e}")
+        return error_response(
+            message=str(e),
+            error_code="VALIDATION_ERROR"
+        )
     except Exception as e:
         logger.error(f"UPDATE_SUBJECT_ERROR: {e}")
         return error_response(message="Failed to update subject", error_code="UPDATE_SUBJECT_ERROR")
     
 @router.delete("/{subject_id}", response_model=Union[BaseResponse[None], ErrorResponse])
 async def delete_subject(subject_id: int, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
+    """
+    Деактивация предмета (мягкое удаление).
+    
+    (Сгенерировано автоматически(C4S))@v1
+    """
     try:
         if current_user.role != UserRole.ADMIN:
             return error_response(message="You are not allowed to access this resource",
@@ -92,6 +124,11 @@ async def delete_subject(subject_id: int, db: AsyncSession = Depends(get_db), cu
 async def get_subject_teachers(subject_id: int,
                                 skip: int = 0, limit: int = 100,
                                 db: AsyncSession = Depends(get_db), _: User = Depends(get_current_user)):
+    """
+    Получение списка учителей, преподающих данный предмет.
+    
+    (Сгенерировано автоматически(C4S))@v1
+    """
     try:
         teacher_subjects = await teacher_subject_repository.get_teachers_by_subject(db=db, subject_id=subject_id, skip=skip, limit=limit)
         if not teacher_subjects:
@@ -112,6 +149,11 @@ async def get_subject_teachers(subject_id: int,
     
 @router.get("/{subject_id}", response_model=Union[BaseResponse[SubjectList], ErrorResponse])
 async def get_subject(subject_id: int, db: AsyncSession = Depends(get_db), _: User = Depends(get_current_user)):
+    """
+    Получение информации о конкретном предмете.
+    
+    (Сгенерировано автоматически(C4S))@v1
+    """
     try:
         subject = await subject_repository.get(db=db, id=subject_id)
         if not subject:
@@ -124,6 +166,11 @@ async def get_subject(subject_id: int, db: AsyncSession = Depends(get_db), _: Us
     
 @router.post("/{subject_id}/teachers", response_model=Union[BaseResponse[TeacherWithSubjects], ErrorResponse])
 async def assign_subject_to_teacher(subject_id: int, teacher_id: int, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
+    """
+    Назначение предмета учителю.
+    
+    (Сгенерировано автоматически(C4S))@v1
+    """
     try:
         if current_user.role != UserRole.ADMIN:
             return error_response(message="You are not allowed to access this resource",
@@ -154,12 +201,23 @@ async def assign_subject_to_teacher(subject_id: int, teacher_id: int, db: AsyncS
             subject=subjects_list
         )
         return success_response(data=teacher_with_subject, message="Teacher added to subject successfully")
+    except ValueError as e:
+        logger.error(f"VALIDATION_ERROR: {e}")
+        return error_response(
+            message=str(e),
+            error_code="VALIDATION_ERROR"
+        )
     except Exception as e:
         logger.error(f"ADD_SUBJECT_TEACHER_ERROR: {e}")
         return error_response(message="Failed to add teacher to subject", error_code="ADD_SUBJECT_TEACHER_ERROR")
     
 @router.get("/{teacher_id}/subjects", response_model=Union[BaseResponse[List[SubjectList]], ErrorResponse])
 async def get_teacher_subjects(teacher_id: int, db: AsyncSession = Depends(get_db), _: User = Depends(get_current_user)):
+    """
+    Получение списка предметов, которые преподает учитель.
+    
+    (Сгенерировано автоматически(C4S))@v1
+    """
     try:
         teacher = await teacher_repository.get_user_teacher(db=db, user_id=teacher_id)
         if not teacher:

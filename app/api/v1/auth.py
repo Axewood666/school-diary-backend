@@ -71,6 +71,12 @@ async def invite_user(
             data=invite,
             message="User invited successfully"
         )
+    except ValueError as e:
+        logger.error(f"VALIDATION_ERROR: {e}")
+        return error_response(
+            message=str(e),
+            error_code="VALIDATION_ERROR"
+        )
     except Exception as e:
         logger.error(f"INVITE_ERROR: {e}")
         return error_response(
@@ -88,6 +94,12 @@ async def accept_invite(accept_invite: AcceptInvite, db: AsyncSession = Depends(
         return success_response(
             data=token,
             message="Invite accepted successfully"
+        )
+    except ValueError as e:
+        logger.error(f"VALIDATION_ERROR: {e}")
+        return error_response(
+            message=str(e),
+            error_code="VALIDATION_ERROR"
         )
     except Exception as e:
         logger.error(f"INVITE_ACCEPT_ERROR: {e}")

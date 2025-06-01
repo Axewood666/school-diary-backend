@@ -1,4 +1,3 @@
-
 from fastapi import APIRouter, Depends, UploadFile, File as FastAPIFile
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -27,7 +26,11 @@ async def upload_file(
     minio_service: MinioService = Depends(get_minio_service),
     _: User = Depends(get_current_user)
 ):
-    """Загрузка файла в хранилище."""
+    """
+    Загрузка файла в хранилище с проверкой размера и типа.
+    
+    (Сгенерировано автоматически(C4S))@v1
+    """
     try:
         file_data = await file.read()
         file_size = len(file_data)
@@ -67,6 +70,12 @@ async def upload_file(
             data=result,
             message="File uploaded successfully"
         )
+    except ValueError as e:
+        logger.error(f"VALIDATION_ERROR: {e}")
+        return error_response(
+            message=str(e),
+            error_code="VALIDATION_ERROR"
+        )
     except Exception as e:
         logger.error(f"FILE_UPLOAD_ERROR: {e}")
         return error_response(
@@ -81,7 +90,11 @@ async def get_file_by_id(
     minio_service: MinioService = Depends(get_minio_service),
     _: User = Depends(get_current_user),
 ):
-    """Получение информации о файле с URL для доступа."""
+    """
+    Получение информации о файле с URL для прямого доступа.
+    
+    (Сгенерировано автоматически(C4S))@v1
+    """
     try:
         db_file = await file_repository.get(db=db, id=file_id)
         if not db_file:
@@ -116,7 +129,11 @@ async def delete_file(
     minio_service: MinioService = Depends(get_minio_service),
     current_user: User = Depends(get_current_user)
 ):
-    """Удаление файла."""
+    """
+    Удаление файла из хранилища и базы данных.
+    
+    (Сгенерировано автоматически(C4S))@v1
+    """
     if current_user.role != UserRole.ADMIN:
         return error_response(
             message="You are not allowed to delete files",

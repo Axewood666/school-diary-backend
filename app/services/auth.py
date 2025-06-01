@@ -100,60 +100,91 @@ async def create_user_invite(db: AsyncSession,
         )
         
 async def invite_accept_process(accept_invite: AcceptInvite, db: AsyncSession) -> int:
-    invite = await user_invite_repository.get_by_token(db=db, token=accept_invite.token)
-    if not invite:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Invite not found",
-        )
-        
-    if invite.is_expired():
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invite expired",
-        )
-    
-    if invite.is_used():
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invite already used",
-        )
-    
-    user = await user_repository.get_by_email(db=db, email=invite.email)
-    if user:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="User already exists",
-        )
-    
-    hashed_password = get_password_hash(accept_invite.password)
-    username = username_from_fio(invite.full_name)
-    user_data = {
-        "email": invite.email,
-        "username": username,
-        "hashed_password": hashed_password,
-        "full_name": invite.full_name,
-        "role": invite.role
-    }
-    db_user = await user_repository.create(db=db, obj_in=UserInDB(**user_data))
-    invite.used_at = datetime.now()
-    await user_invite_repository.update_used_status(db=db, user_invite_id=invite.id)
-    if invite.role == UserRole.STUDENT:
-        student_data = {
-            "user_id": db_user.id,
-            "class_id": None,
-            "parent_phone": None,
-            "parent_email": None,
-        }
-        await student_repository.create_student(db=db, student_in=StudentInDb(**student_data))
-    elif invite.role == UserRole.TEACHER:
-        teacher_data = {
-            "user_id": db_user.id,
-            "class_id": None,
-            "degree": None,
-            "experience": None,
-            "bio": None
-        }
-        await teacher_repository.create_teacher(db=db, teacher_in=TeacherInDb(**teacher_data))
-    
-    return db_user.id
+    """
+    Если произойдет ошибка при создании профиля (student/teacher), 
+    откатывается создание пользователя и обновление приглашения.
+    """
+    async with db.begin() as transaction:
+        try:
+            invite = await user_invite_repository.get_by_token(db=db, token=accept_invite.token)
+            if not invite:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Invite not found",
+                )
+                
+            if invite.is_expired():
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Invite expired",
+                )
+            
+            if invite.is_used():
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Invite already used",
+                )
+            
+            user = await user_repository.get_by_email(db=db, email=invite.email)
+            if user:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="User already exists",
+                )
+            
+            savepoint = await db.begin_nested()
+            
+            try:
+                hashed_password = get_password_hash(accept_invite.password)
+                username = username_from_fio(invite.full_name)
+                user_data = {
+                    "email": invite.email,
+                    "username": username,
+                    "hashed_password": hashed_password,
+                    "full_name": invite.full_name,
+                    "role": invite.role
+                }
+                db_user = await user_repository.create_without_commit(db=db, obj_in=UserInDB(**user_data))
+                
+                invite.used_at = datetime.now()
+                await user_invite_repository.update_used_status(db=db, user_invite_id=invite.id)
+                
+                if invite.role == UserRole.STUDENT:
+                    student_data = {
+                        "user_id": db_user.id,
+                        "class_id": None,
+                        "parent_phone": None,
+                        "parent_email": None,
+                        "parent_fio": None
+                    }
+                    await student_repository.create_student(db=db, student_in=StudentInDb(**student_data))
+                    
+                elif invite.role == UserRole.TEACHER:
+                    teacher_data = {
+                        "user_id": db_user.id,
+                        "class_id": None,
+                        "degree": None,
+                        "experience": None,
+                        "bio": None
+                    }
+                    await teacher_repository.create_teacher(db=db, teacher_in=TeacherInDb(**teacher_data))
+                
+                await savepoint.commit()
+                
+                return db_user.id
+                
+            except Exception as profile_error:
+                await savepoint.rollback()
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail=f"Failed to create user profile: {str(profile_error)}",
+                )
+                
+        except HTTPException:
+            raise
+        except Exception as e:
+            await transaction.rollback()
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Transaction failed: {str(e)}",
+            )

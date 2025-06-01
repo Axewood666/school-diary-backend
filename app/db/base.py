@@ -36,6 +36,14 @@ class BaseRepository(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         await db.refresh(db_obj)
         return db_obj
 
+    async def create_without_commit(self, db: AsyncSession, *, obj_in: CreateSchemaType) -> ModelType:
+        obj_in_data = obj_in.model_dump()
+        db_obj = self.model(**obj_in_data)
+        db.add(db_obj)
+        await db.flush() 
+        await db.refresh(db_obj)
+        return db_obj
+
     async def update(
         self,
         db: AsyncSession,
